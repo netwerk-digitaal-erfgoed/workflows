@@ -24,7 +24,6 @@ jobs:
         if: ${{ hashFiles('index.bs.liquid') != '' }}
         with:
           node-version: lts/*
-          cache: 'npm'
 
       - name: Generate index.bs based on SHACL shapes
         if: ${{ hashFiles('index.bs.liquid') != '' }}
