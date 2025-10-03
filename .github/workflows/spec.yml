@@ -20,14 +20,27 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
-        if: ${{ hashFiles('index.bs.liquid') != '' }}
+      - uses: actions/setup-node@v5
         with:
           node-version: lts/*
 
-      - name: Generate index.bs based on SHACL shapes
-        if: ${{ hashFiles('index.bs.liquid') != '' }}
-        run: npx --yes @lde/docgen@latest from-shacl shacl.ttl index.bs.liquid > index.bs
+      - name: Render .liquid template files
+        if: ${{ hashFiles('**/*.liquid') != '' }}
+        run: |
+          set -e
+          for template_file in $(find . -name '*.liquid' -type f); do
+            output_file="${template_file%.liquid}"
+            npx --yes @lde/docgen@latest from-shacl shacl.ttl "$template_file" > "$output_file"
+          done
+
+      - name: Render Mermaid diagrams
+        if: ${{ hashFiles('**/*.mmd') != '' }}
+        run: |
+          set -e
+          for mermaid_file in $(find . -name '*.mmd' -type f); do
+            output_file="${mermaid_file%.mmd}.svg"
+            npx --yes -p @mermaid-js/mermaid-cli mmdc -i "$mermaid_file" -o "$output_file" --backgroundColor transparent --theme neutral
+          done
 
       - name: Build and validate
         uses: w3c/spec-prod@v2
