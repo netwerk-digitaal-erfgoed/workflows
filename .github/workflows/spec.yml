@@ -39,7 +39,7 @@ jobs:
           set -e
           for mermaid_file in $(find . -name '*.mmd' -type f); do
             output_file="${mermaid_file%.mmd}.svg"
-            npx --yes -p @mermaid-js/mermaid-cli mmdc -i "$mermaid_file" -o "$output_file" --backgroundColor transparent --theme neutral
+            npx --yes -p @mermaid-js/mermaid-cli mmdc -i "$mermaid_file" -o "$output_file" --backgroundColor transparent --theme neutral -p puppeteer-config.json
           done
 
       - name: Build and validate
