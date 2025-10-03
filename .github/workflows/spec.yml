@@ -37,6 +37,7 @@ jobs:
         if: ${{ hashFiles('**/*.mmd') != '' }}
         run: |
           set -e
+          echo '{"args":["--no-sandbox"]}' > puppeteer-config.json
           for mermaid_file in $(find . -name '*.mmd' -type f); do
             output_file="${mermaid_file%.mmd}.svg"
             npx --yes -p @mermaid-js/mermaid-cli mmdc -i "$mermaid_file" -o "$output_file" --backgroundColor transparent --theme neutral -p puppeteer-config.json
