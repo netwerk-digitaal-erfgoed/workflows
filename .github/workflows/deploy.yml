@@ -2,6 +2,9 @@ name: Build and publish Docker image
 
 on:
   workflow_call:
+    secrets:
+      CONTAINER_REGISTRY_TOKEN:
+        required: true
 
 jobs:
   build:
