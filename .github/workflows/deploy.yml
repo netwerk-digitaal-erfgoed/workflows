@@ -2,6 +2,11 @@ name: Build and publish Docker image
 
 on:
   workflow_call:
+    inputs:
+      target:
+        description: 'Target build stage to build'
+        required: false
+        type: string
     secrets:
       CONTAINER_REGISTRY_TOKEN:
         required: true
@@ -16,7 +21,8 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          echo "docker_image=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
+          suffix="${{ inputs.target && format('-{0}', inputs.target) || '' }}"
+          echo "docker_image=ghcr.io/${{ github.repository }}${suffix}" >> $GITHUB_OUTPUT
           echo "build_tag=$(git show -s --format=%cd-%h --date=format:%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
@@ -34,6 +40,7 @@ jobs:
         with:
           context: .
           push: true
+          target: ${{ inputs.target }}
           tags: |
             ${{ steps.vars.outputs.docker_image }}:${{ steps.vars.outputs.build_tag }}
             ${{ steps.vars.outputs.docker_image }}:latest
