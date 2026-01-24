@@ -7,6 +7,10 @@ on:
         description: 'Target build stage to build'
         required: false
         type: string
+      build-args:
+        description: 'Build arguments to pass to Docker build'
+        required: false
+        type: string
     secrets:
       CONTAINER_REGISTRY_TOKEN:
         required: true
@@ -41,6 +45,7 @@ jobs:
           context: .
           push: true
           target: ${{ inputs.target }}
+          build-args: ${{ inputs.build-args }}
           tags: |
             ${{ steps.vars.outputs.docker_image }}:${{ steps.vars.outputs.build_tag }}
             ${{ steps.vars.outputs.docker_image }}:latest
