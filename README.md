@@ -31,16 +31,6 @@ jobs:
       publish: true
 ```
 
-### [`spec-validate.yml`](.github/workflows/spec-validate.yml)
-
-Validates a specification document without publishing it.
-
-```yaml
-jobs:
-  validate:
-    uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/spec-validate.yml@main
-```
-
 ### [`dependabot-auto-merge.yml`](.github/workflows/dependabot-auto-merge.yml)
 
 Automatically squash-merges Dependabot pull requests.
