@@ -35,7 +35,14 @@ jobs:
 
 Automatically squash-merges Dependabot pull requests.
 
-> **Note:** this workflow is not reusable — copy it into your repository's `.github/workflows/` directory.
+```yaml
+on:
+  pull_request:
+
+jobs:
+  auto-merge:
+    uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/dependabot-auto-merge.yml@main
+```
 
 ### [`nx-migrate.yml`](.github/workflows/nx-migrate.yml)
 
