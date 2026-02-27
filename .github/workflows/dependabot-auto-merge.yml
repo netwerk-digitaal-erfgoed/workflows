@@ -2,6 +2,7 @@ name: Auto-merge Dependabot PRs
 
 on:
   pull_request:
+  workflow_call:
 
 permissions:
   contents: write
