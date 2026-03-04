@@ -1,15 +1,17 @@
 /**
- * Syncs CHANGELOG.md (release-please format) into the Changes section of index.bs.liquid.
+ * Syncs CHANGELOG.md (release-please format) into the Changes section of a Bikeshed spec.
  *
  * - Flattens category subsections (Features, Bug Fixes, etc.) into a single list per version.
  * - Strips commit/PR reference links from bullet items.
  * - Outputs Bikeshed-compatible markup between <!-- CHANGELOG-START --> and <!-- CHANGELOG-END --> markers.
+ *
+ * Auto-detects the spec file: uses index.bs.liquid if present, otherwise index.bs.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 const changelogPath = 'CHANGELOG.md';
-const specPath = 'index.bs.liquid';
+const specPath = existsSync('index.bs.liquid') ? 'index.bs.liquid' : 'index.bs';
 const versionPath = 'version.txt';
 
 const START_MARKER = '<!-- CHANGELOG-START -->';
