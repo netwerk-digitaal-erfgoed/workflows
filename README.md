@@ -44,6 +44,26 @@ jobs:
     uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/dependabot-auto-merge.yml@main
 ```
 
+### [`release-please.yml`](.github/workflows/release-please.yml)
+
+Runs [Release Please](https://github.com/googleapis/release-please) to automate releases.
+Optionally syncs `CHANGELOG.md` into a Bikeshed spec (`index.bs.liquid`) on the release PR branch.
+
+```yaml
+jobs:
+  release:
+    uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/release-please.yml@main
+    secrets:
+      token: ${{ secrets.RELEASE_TOKEN }}
+```
+
+To disable changelog syncing:
+
+```yaml
+    with:
+      sync-changelog: false
+```
+
 ### [`nx-migrate.yml`](.github/workflows/nx-migrate.yml)
 
 Checks for a newer Nx version, runs `nx migrate`, and opens a pull request with the result.
