@@ -32,12 +32,9 @@ jobs:
         with:
           token: ${{ secrets.token }}
 
-      - name: Fetch sync script
-        run: curl -fsSL https://raw.githubusercontent.com/netwerk-digitaal-erfgoed/workflows/main/scripts/sync-changelog.mjs -o sync-changelog.mjs
-
       - name: Sync changelog to spec
         run: |
-          node sync-changelog.mjs
+          curl -fsSL https://raw.githubusercontent.com/netwerk-digitaal-erfgoed/workflows/main/scripts/sync-changelog.mjs | node --input-type=module
           if git diff --quiet; then
             echo "No changes"
           else
