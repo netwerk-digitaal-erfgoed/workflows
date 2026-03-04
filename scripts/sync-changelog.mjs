@@ -11,15 +11,14 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 const changelogPath = 'CHANGELOG.md';
-const manifestPath = '.release-please-manifest.json';
 const specPath = existsSync('index.bs.liquid') ? 'index.bs.liquid' : 'index.bs';
+const versionPath = 'version.txt';
 
 const START_MARKER = '<!-- CHANGELOG-START -->';
 const END_MARKER = '<!-- CHANGELOG-END -->';
 
 const changelog = readFileSync(changelogPath, 'utf-8');
-const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
-const version = manifest['.'];
+const version = readFileSync(versionPath, 'utf-8').trim();
 let spec = readFileSync(specPath, 'utf-8');
 
 // Parse version sections from CHANGELOG.md.
