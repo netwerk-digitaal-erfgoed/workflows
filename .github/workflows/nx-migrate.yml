@@ -33,11 +33,15 @@ jobs:
             echo "Nx update available: $current -> $latest"
           fi
 
+      - name: Install dependencies
+        if: steps.check.outputs.up_to_date == 'false'
+        run: npm install
+
       - name: Run nx migrate
         if: steps.check.outputs.up_to_date == 'false'
         run: npx nx migrate latest
 
-      - name: Install dependencies
+      - name: Install updated dependencies
         if: steps.check.outputs.up_to_date == 'false'
         run: npm install
 
