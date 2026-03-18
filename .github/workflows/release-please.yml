@@ -7,6 +7,10 @@ on:
         description: 'Whether to sync CHANGELOG.md into the Bikeshed spec'
         type: boolean
         default: true
+      working-directory:
+        description: 'Directory containing the spec files (version.txt, CHANGELOG.md, index.bs)'
+        type: string
+        default: '.'
     secrets:
       token:
         required: true
@@ -33,6 +37,7 @@ jobs:
           token: ${{ secrets.token }}
 
       - name: Sync changelog to spec
+        working-directory: ${{ inputs.working-directory }}
         run: |
           curl -fsSL https://raw.githubusercontent.com/netwerk-digitaal-erfgoed/workflows/main/scripts/sync-changelog.mjs | node --input-type=module
           if git diff --quiet; then
