@@ -39,6 +39,7 @@ jobs:
       - name: Sync changelog to spec
         working-directory: ${{ inputs.working-directory }}
         run: |
+          if [ ! -f CHANGELOG.md ]; then echo "No CHANGELOG.md, skipping"; exit 0; fi
           curl -fsSL https://raw.githubusercontent.com/netwerk-digitaal-erfgoed/workflows/main/scripts/sync-changelog.mjs | node --input-type=module
           if git diff --quiet; then
             echo "No changes"
