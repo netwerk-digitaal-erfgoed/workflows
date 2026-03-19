@@ -53,6 +53,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Sync changelog to spec
+        id: sync
         working-directory: ${{ inputs.working-directory }}
         run: |
           if [ ! -f CHANGELOG.md ]; then echo "No CHANGELOG.md, skipping"; exit 0; fi
@@ -60,7 +61,13 @@ jobs:
           if git diff --quiet; then
             echo "No changes"
           else
-            git add -A
-            git commit -m "chore: sync changelog to spec"
-            git push
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Commit synced changelog
+        if: steps.sync.outputs.has-changes == 'true'
+        uses: step-security/github-api-commit-action@v1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: "chore: sync changelog to spec"
+          stage-all-files: true
