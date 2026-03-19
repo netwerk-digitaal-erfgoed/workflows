@@ -2,6 +2,11 @@ name: Nx migrate
 
 on:
   workflow_call:
+    secrets:
+      GH_APP_ID:
+        required: true
+      GH_APP_PRIVATE_KEY:
+        required: true
 
 permissions:
   contents: write
@@ -53,10 +58,19 @@ jobs:
         if: steps.check.outputs.up_to_date == 'false'
         run: rm -f migrations.json
 
+      - name: Generate app token
+        if: steps.check.outputs.up_to_date == 'false'
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
       - name: Create pull request
         if: steps.check.outputs.up_to_date == 'false'
         uses: peter-evans/create-pull-request@v8
         with:
+          token: ${{ steps.app-token.outputs.token }}
           branch: build/nx-migrate-${{ steps.check.outputs.latest }}
           commit-message: 'build(deps): migrate Nx to ${{ steps.check.outputs.latest }}'
           title: 'build(deps): migrate Nx to ${{ steps.check.outputs.latest }}'
