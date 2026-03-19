@@ -2,6 +2,17 @@
 
 Shared [reusable workflows](https://docs.github.com/en/actions/sharing-automations/reusing-workflows) for [Netwerk Digitaal Erfgoed](https://github.com/netwerk-digitaal-erfgoed) repositories.
 
+## Authentication
+
+These workflows authenticate using a [GitHub App](https://docs.github.com/en/apps) rather than personal
+access tokens or the default `GITHUB_TOKEN`. This is necessary because actions performed with
+`GITHUB_TOKEN` [do not trigger new workflow runs](https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#triggering-a-workflow-from-a-workflow),
+so PRs created or merged by workflows (e.g. Release Please, Dependabot auto-merge, Nx migrate) would
+not run CI checks. A GitHub App token does trigger downstream workflows.
+
+The app's credentials (`GH_APP_ID` and `GH_APP_PRIVATE_KEY`) must be stored as organisation secrets.
+Caller workflows pass them with `secrets: inherit`.
+
 ## Workflows
 
 ### [`deploy.yml`](.github/workflows/deploy.yml)
