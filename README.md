@@ -13,8 +13,7 @@ Supports optional `target` (multi-stage build target) and `build-args` inputs.
 jobs:
   deploy:
     uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/deploy.yml@main
-    secrets:
-      CONTAINER_REGISTRY_TOKEN: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
+    secrets: inherit
 ```
 
 ### [`spec.yml`](.github/workflows/spec.yml)
@@ -42,6 +41,7 @@ on:
 jobs:
   auto-merge:
     uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/dependabot-auto-merge.yml@main
+    secrets: inherit
 ```
 
 ### [`release-please.yml`](.github/workflows/release-please.yml)
@@ -53,8 +53,7 @@ Optionally syncs `CHANGELOG.md` into a Bikeshed spec (`index.bs.liquid`) on the 
 jobs:
   release:
     uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/release-please.yml@main
-    secrets:
-      token: ${{ secrets.RELEASE_TOKEN }}
+    secrets: inherit
 ```
 
 To disable changelog syncing:
@@ -72,6 +71,7 @@ Checks for a newer Nx version, runs `nx migrate`, and opens a pull request with 
 jobs:
   nx-migrate:
     uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/nx-migrate.yml@main
+    secrets: inherit
 ```
 
 ## Dependabot
