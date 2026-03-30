@@ -15,6 +15,9 @@ permissions:
 jobs:
   migrate:
     runs-on: ubuntu-latest
+    env:
+      # Disable pre-commit hooks so the PR is always created; CI will catch lint issues on the PR itself.
+      HUSKY: 0
     steps:
       - uses: actions/checkout@v6
 
