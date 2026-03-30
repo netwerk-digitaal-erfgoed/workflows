@@ -66,7 +66,7 @@ jobs:
         with:
           path: '.'
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
       - id: deployment
         uses: actions/deploy-pages@v5
