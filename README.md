@@ -74,6 +74,32 @@ To disable changelog syncing:
       sync-changelog: false
 ```
 
+#### Customising release notes
+
+Release Please generates changelog entries from conventional commit messages. To customise
+individual entries, you have two options:
+
+**Reword or exclude entries before a release** using Release Please's
+[`BEGIN_COMMIT_OVERRIDE`](https://github.com/googleapis/release-please/blob/main/docs/customizing.md#use-conventional-commit-messages):
+edit the body of the **merged source PR** (not the release PR) and add an override block:
+
+```
+BEGIN_COMMIT_OVERRIDE
+feat: reworded description of the feature
+END_COMMIT_OVERRIDE
+```
+
+Release Please reads PR bodies via the GitHub API, so the override takes effect on the next
+push to `main`. To exclude an entry entirely, override with a hidden type (e.g. `chore:`).
+
+**Edit `CHANGELOG.md` on the release PR branch** as the last step before merging.
+Release Please force-pushes the branch when new commits land on `main`, so make sure no other
+PRs are merged between your edit and the release PR merge. The `sync-changelog` job will
+automatically update `index.bs.liquid` from your edited `CHANGELOG.md`.
+
+To edit already-released versions, commit directly to `main` – Release Please only prepends
+new version sections and never modifies old ones.
+
 ### [`nx-migrate.yml`](.github/workflows/nx-migrate.yml)
 
 Checks for a newer Nx version, runs `nx migrate`, and opens a pull request with the result.
