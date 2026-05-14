@@ -102,13 +102,42 @@ new version sections and never modifies old ones.
 
 ### [`nx-migrate.yml`](.github/workflows/nx-migrate.yml)
 
-Checks for a newer Nx version, runs `nx migrate`, and opens a pull request with the result.
+Runs `nx migrate` on top of a Dependabot grouped-`nx` pull request to add any code migrations
+Dependabot cannot generate, then pushes the result back onto the same PR branch so required
+checks rerun.
+
+The workflow itself gates on `github.actor == 'dependabot[bot]'` and a `dependabot/npm_and_yarn/nx-`
+head-ref prefix, so it is a no-op on every other pull request.
 
 ```yaml
+# .github/workflows/nx-migrate.yml
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
 jobs:
   nx-migrate:
     uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/nx-migrate.yml@main
     secrets: inherit
+```
+
+The consuming repository's `.github/dependabot.yml` must group `nx` and `@nx/*` together so
+Dependabot opens a single coherent PR for the whole set:
+
+```yaml
+# .github/dependabot.yml
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+    groups:
+      nx:
+        patterns:
+          - 'nx'
+          - '@nx/*'
 ```
 
 ## Dependabot
