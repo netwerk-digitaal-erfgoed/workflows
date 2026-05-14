@@ -28,17 +28,26 @@ const versionPattern = /^## \[?(\d+\.\d+\.\d+)\]?(?:\([^)]*\))? \((\d{4}-\d{2}-\
 
 const versions = [];
 let currentVersion = null;
+let inBreakingSection = false;
 
 for (const line of changelog.split('\n')) {
   const versionMatch = line.match(versionPattern);
   if (versionMatch) {
     currentVersion = { version: versionMatch[1], date: versionMatch[2], items: [] };
     versions.push(currentVersion);
+    inBreakingSection = false;
     continue;
   }
 
-  // Skip category headings (### Features, ### Bug Fixes, etc.)
-  if (line.startsWith('### ')) continue;
+  // Track BREAKING CHANGES sections so we skip their bullets — release-please
+  // duplicates the same items under Features/Bug Fixes (with the commit link),
+  // and we want each item listed once in the spec changelog.
+  if (line.startsWith('### ')) {
+    inBreakingSection = /breaking changes/i.test(line);
+    continue;
+  }
+
+  if (inBreakingSection) continue;
 
   // Collect bullet items.
   if (currentVersion && line.startsWith('* ')) {
