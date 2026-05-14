@@ -91,10 +91,24 @@ jobs:
           npx nx migrate --run-migrations
           rm -f migrations.json
 
+      - name: Resolve GitHub App bot user id
+        # Needed to attribute the commit to the App that mints the token,
+        # rather than to github-actions[bot]. The user-id lookup gives us the
+        # numeric prefix for the noreply email so the commit is verified as
+        # authored by this bot account.
+        id: app-user
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          slug='${{ steps.app-token.outputs.app-slug }}'
+          user_id=$(gh api "/users/${slug}[bot]" --jq .id)
+          echo "name=${slug}[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=${user_id}+${slug}[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+
       - name: Commit and push to PR branch
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name '${{ steps.app-user.outputs.name }}'
+          git config user.email '${{ steps.app-user.outputs.email }}'
           git add -A
           if git diff --cached --quiet; then
             echo "nx migrate produced no changes beyond Dependabot’s bump."
