@@ -1,5 +1,13 @@
 name: Nx migrate
 
+# Runs `nx migrate` on top of a Dependabot grouped-nx pull request.
+#
+# Architecture: Dependabot bumps `nx` and `@nx/*` together (the consuming
+# repo's `dependabot.yml` defines an `nx` group). This workflow watches
+# for the resulting PR, runs `nx migrate` to add any code migrations
+# Dependabot cannot generate, and pushes the codemod commit back onto the
+# PR branch using a GitHub App token so required checks rerun.
+
 on:
   workflow_call:
     secrets:
@@ -9,78 +17,87 @@ on:
         required: true
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   migrate:
+    # Only act on Dependabot's grouped-nx PR. The branch-prefix check is
+    # what scopes us to the `nx` group specifically; without it we would
+    # run on every Dependabot npm PR.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.actor == 'dependabot[bot]' &&
+      startsWith(github.event.pull_request.head.ref, 'dependabot/npm_and_yarn/nx-')
     runs-on: ubuntu-latest
     env:
-      # Disable pre-commit hooks so the PR is always created; CI will catch lint issues on the PR itself.
+      # Don’t run husky during automated installs.
       HUSKY: 0
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: 'npm'
-
-      - name: Check for newer Nx version
-        id: check
-        run: |
-          current=$(node -p "require('./package.json').devDependencies.nx")
-          latest=$(npm view nx version)
-          echo "current=$current" >> "$GITHUB_OUTPUT"
-          echo "latest=$latest" >> "$GITHUB_OUTPUT"
-          if [ "$current" = "$latest" ]; then
-            echo "up_to_date=true" >> "$GITHUB_OUTPUT"
-            echo "Already on latest Nx version ($current)."
-          else
-            echo "up_to_date=false" >> "$GITHUB_OUTPUT"
-            echo "Nx update available: $current -> $latest"
-          fi
-
-      - name: Install dependencies
-        if: steps.check.outputs.up_to_date == 'false'
-        run: npm install
-
-      - name: Run nx migrate
-        if: steps.check.outputs.up_to_date == 'false'
-        run: npx nx migrate latest
-
-      - name: Install updated dependencies
-        if: steps.check.outputs.up_to_date == 'false'
-        run: npm install
-
-      - name: Run migrations
-        if: steps.check.outputs.up_to_date == 'false' && hashFiles('migrations.json') != ''
-        run: npx nx migrate --run-migrations
-
-      - name: Remove migrations.json
-        if: steps.check.outputs.up_to_date == 'false'
-        run: rm -f migrations.json
-
       - name: Generate app token
-        if: steps.check.outputs.up_to_date == 'false'
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-      - name: Create pull request
-        if: steps.check.outputs.up_to_date == 'false'
-        uses: peter-evans/create-pull-request@v8
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ steps.app-token.outputs.token }}
+          # Need history to revert Dependabot’s manifest changes back to base.
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Read target Nx version
+        id: nx
+        run: |
+          version=$(node -p "require('./package.json').devDependencies.nx")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Revert manifest+lockfile to base (so nx migrate sees the bump)
+        # nx migrate needs to know the “from” version. Dependabot has already
+        # rewritten package.json to the new version, so nx would think there is
+        # nothing to do. Reverting both files to base gives nx migrate an old
+        # baseline to migrate from, just like the angular-eslint workflow does
+        # with pnpm-workspace.yaml + pnpm-lock.yaml.
+        run: |
+          git checkout "origin/${{ github.event.pull_request.base.ref }}" -- package.json package-lock.json
+
+      - name: Install baseline dependencies
+        run: npm install --ignore-scripts
+
+      - name: Run nx migrate to target version
+        run: npx nx migrate ${{ steps.nx.outputs.version }}
+
+      - name: Sync lockfile to migrated package.json
+        # nx migrate may bump packages beyond what Dependabot grouped (e.g.
+        # peer-bumped @typescript-eslint/*). --legacy-peer-deps skips npm’s
+        # transient peer-conflict check; the migrated @nx/* set is internally
+        # consistent so this does not mask a real conflict, only the
+        # lockfile-state race between package.json updates and reconciliation.
+        run: npm install --legacy-peer-deps
+
+      - name: Apply code migrations
+        if: hashFiles('migrations.json') != ''
+        run: |
+          npx nx migrate --run-migrations
+          rm -f migrations.json
+
+      - name: Commit and push to PR branch
+        # Commits via the GitHub Contents API so the commit is authored by the
+        # App that minted the token (no local git identity needed) and is
+        # verified-signed by GitHub. The action is a no-op when there is
+        # nothing staged, so we do not need an explicit "nothing changed" guard.
+        uses: grafana/github-api-commit-action@v1
         with:
           token: ${{ steps.app-token.outputs.token }}
-          sign-commits: true
-          branch: build/nx-migrate-${{ steps.check.outputs.latest }}
-          commit-message: 'build(deps): migrate Nx to ${{ steps.check.outputs.latest }}'
-          title: 'build(deps): migrate Nx to ${{ steps.check.outputs.latest }}'
-          body: |
-            Automated Nx migration from ${{ steps.check.outputs.current }} to ${{ steps.check.outputs.latest }}.
-
-            This PR was created by `nx migrate` which also runs any code migrations (codemods) needed for the new version.
-
-            Please review the changes and verify that CI passes before merging.
+          commit-message: 'build(deps): apply nx migrate ${{ steps.nx.outputs.version }}'
+          stage-all-files: true
