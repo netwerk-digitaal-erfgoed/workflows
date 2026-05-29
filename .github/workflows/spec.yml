@@ -39,12 +39,22 @@ jobs:
         if: ${{ hashFiles('**/*.mmd') != '' }}
         run: |
           set -e
-          # Install the exact Chrome build that mermaid-cli's bundled puppeteer expects.
-          # Running the installer through mermaid-cli's own puppeteer (rather than a
-          # standalone one) guarantees the version matches; both npx calls share the
-          # same ~/.cache/puppeteer, so mmdc finds the browser installed here.
-          npx --yes -p @mermaid-js/mermaid-cli puppeteer browsers install chrome
-          echo '{"args":["--no-sandbox"]}' > puppeteer-config.json
+          # mermaid-cli's bundled puppeteer pins a Chrome build that is not published to
+          # the Chrome-for-Testing catalog, so neither its auto-download nor an explicit
+          # `puppeteer browsers install` can fetch it. Point puppeteer at the Chrome that
+          # is already preinstalled on the runner instead.
+          chrome_path=""
+          for candidate in google-chrome google-chrome-stable chromium-browser chromium; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              chrome_path="$(command -v "$candidate")"
+              break
+            fi
+          done
+          if [[ -n "$chrome_path" ]]; then
+            printf '{"args":["--no-sandbox"],"executablePath":"%s"}\n' "$chrome_path" > puppeteer-config.json
+          else
+            echo '{"args":["--no-sandbox"]}' > puppeteer-config.json
+          fi
           for mermaid_file in $(find . -name '*.mmd' -type f); do
             output_file="${mermaid_file%.mmd}.svg"
             npx --yes -p @mermaid-js/mermaid-cli mmdc -i "$mermaid_file" -o "$output_file" --backgroundColor transparent --theme neutral -p puppeteer-config.json
