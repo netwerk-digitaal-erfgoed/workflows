@@ -39,10 +39,14 @@ jobs:
         if: ${{ hashFiles('**/*.mmd') != '' }}
         run: |
           set -e
+          # Use the Chrome that is preinstalled on the runner instead of letting
+          # Puppeteer download a fresh Chromium (~150 MB) on every run.
+          export PUPPETEER_SKIP_DOWNLOAD=true
+          export PUPPETEER_EXECUTABLE_PATH="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium-browser)"
           echo '{"args":["--no-sandbox"]}' > puppeteer-config.json
           for mermaid_file in $(find . -name '*.mmd' -type f); do
             output_file="${mermaid_file%.mmd}.svg"
-            npx --yes -p @mermaid-js/mermaid-cli mmdc -i "$mermaid_file" -o "$output_file" --backgroundColor transparent --theme neutral -p puppeteer-config.json
+            npx --yes -p @mermaid-js/mermaid-cli@11.15.0 mmdc -i "$mermaid_file" -o "$output_file" --backgroundColor transparent --theme neutral -p puppeteer-config.json
           done
 
       - name: Build and validate
