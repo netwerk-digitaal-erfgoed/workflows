@@ -41,6 +41,19 @@ jobs:
       publish: true
 ```
 
+#### Hosting static files
+
+When publishing, the contents of a `public/` directory at the repository root are copied to the
+published site root, alongside the built spec. This is useful for hosting a companion file such as a
+JSON-LD `@context`:
+
+```
+public/context.jsonld  →  https://<pages-domain>/<repo>/context.jsonld
+```
+
+The feature is opt-in: repositories without a `public/` directory are unaffected. The built spec
+itself is unchanged — only the extra files are added.
+
 ### [`dependabot-auto-merge.yml`](.github/workflows/dependabot-auto-merge.yml)
 
 Automatically squash-merges Dependabot pull requests.
