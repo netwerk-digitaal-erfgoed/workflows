@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -82,7 +82,7 @@ jobs:
       # Publish repo-level static files (e.g. a hosted JSON-LD context) alongside the
       # built spec. Opt-in: only repos with a public/ directory are affected; its
       # contents are copied to the published site root.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           path: _source
       - name: Copy public/ static files to the site root
