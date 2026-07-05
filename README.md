@@ -122,6 +122,11 @@ checks rerun.
 The workflow itself gates on `github.actor == 'dependabot[bot]'` and a `dependabot/npm_and_yarn/nx-`
 head-ref prefix, so it is a no-op on every other pull request.
 
+Transient migration scratch files (`migrations.json` and the `tools/ai-migrations/` prompt
+directories that newer Nx versions generate for AI-assisted migrations) are deleted before the
+commit is pushed. Since no AI agent runs in CI, any prompt-only migrations are skipped; the job
+summary lists their prompt files so they can be applied manually if relevant.
+
 ```yaml
 # .github/workflows/nx-migrate.yml
 on:
