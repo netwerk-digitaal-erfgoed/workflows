@@ -87,8 +87,21 @@ jobs:
 
       - name: Apply code migrations
         if: hashFiles('migrations.json') != ''
+        # tools/ai-migrations/ holds prompt files for AI-assisted migrations
+        # that nx migrate writes alongside migrations.json. Like
+        # migrations.json, Nx expects them to be deleted after the run rather
+        # than committed; in CI no agent applies them, so surface any skipped
+        # prompts in the job summary before removing them.
         run: |
           npx nx migrate --run-migrations
+          if [ -d tools/ai-migrations ]; then
+            {
+              echo '## Skipped AI-assisted migrations'
+              echo 'The following prompt files were generated but not applied (no AI agent in CI). Apply them manually if relevant:'
+              find tools/ai-migrations -type f | sed 's/^/- /'
+            } >> "$GITHUB_STEP_SUMMARY"
+            rm -rf tools/ai-migrations
+          fi
           rm -f migrations.json
 
       - name: Commit and push to PR branch
