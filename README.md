@@ -52,7 +52,7 @@ public/context.jsonld  →  https://<pages-domain>/<repo>/context.jsonld
 ```
 
 The feature is opt-in: repositories without a `public/` directory are unaffected. The built spec
-itself is unchanged — only the extra files are added.
+itself is unchanged – only the extra files are added.
 
 ### [`dependabot-auto-merge.yml`](.github/workflows/dependabot-auto-merge.yml)
 
@@ -138,6 +138,24 @@ on:
 jobs:
   nx-migrate:
     uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/nx-migrate.yml@main
+    secrets: inherit
+```
+
+Workspaces that use pnpm instead of npm pass `package-manager`, and watch `pnpm-lock.yaml`
+rather than `package-lock.json`:
+
+```yaml
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  nx-migrate:
+    uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/nx-migrate.yml@main
+    with:
+      package-manager: pnpm
     secrets: inherit
 ```
 

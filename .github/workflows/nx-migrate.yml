@@ -10,6 +10,11 @@ name: Nx migrate
 
 on:
   workflow_call:
+    inputs:
+      package-manager:
+        description: 'Package manager the workspace uses: npm or pnpm.'
+        type: string
+        default: 'npm'
     secrets:
       GH_APP_ID:
         required: true
@@ -32,6 +37,7 @@ jobs:
     env:
       # Don’t run husky during automated installs.
       HUSKY: 0
+      LOCKFILE: ${{ inputs.package-manager == 'pnpm' && 'pnpm-lock.yaml' || 'package-lock.json' }}
     steps:
       - name: Generate app token
         id: app-token
@@ -50,11 +56,15 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
+      - name: Set up pnpm
+        if: inputs.package-manager == 'pnpm'
+        uses: pnpm/action-setup@v6
+
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           node-version: lts/*
-          cache: npm
+          cache: ${{ inputs.package-manager }}
 
       - name: Read target Nx version
         id: nx
@@ -69,10 +79,10 @@ jobs:
         # baseline to migrate from, just like the angular-eslint workflow does
         # with pnpm-workspace.yaml + pnpm-lock.yaml.
         run: |
-          git checkout "origin/${{ github.event.pull_request.base.ref }}" -- package.json package-lock.json
+          git checkout "origin/${{ github.event.pull_request.base.ref }}" -- package.json "$LOCKFILE"
 
       - name: Install baseline dependencies
-        run: npm install --ignore-scripts
+        run: ${{ inputs.package-manager == 'pnpm' && 'pnpm install --ignore-scripts --no-frozen-lockfile' || 'npm install --ignore-scripts' }}
 
       - name: Run nx migrate to target version
         run: npx nx migrate ${{ steps.nx.outputs.version }}
@@ -83,7 +93,9 @@ jobs:
         # transient peer-conflict check; the migrated @nx/* set is internally
         # consistent so this does not mask a real conflict, only the
         # lockfile-state race between package.json updates and reconciliation.
-        run: npm install --legacy-peer-deps
+        # pnpm needs no such flag – it warns on unmet peers instead of failing –
+        # but it does freeze the lockfile in CI, which the migrated manifest breaks.
+        run: ${{ inputs.package-manager == 'pnpm' && 'pnpm install --no-frozen-lockfile' || 'npm install --legacy-peer-deps' }}
 
       - name: Apply code migrations
         if: hashFiles('migrations.json') != ''
