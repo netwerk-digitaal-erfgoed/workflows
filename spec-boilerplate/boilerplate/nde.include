@@ -1,5 +1,5 @@
 <style>
-/* NDE house style for Bikeshed specifications, from @nde/spec-boilerplate. */
+/* NDE house style for Bikeshed specifications, from netwerk-digitaal-erfgoed/workflows. */
 
 .head [data-fill-with="logo"] {
     float: right;
@@ -9,10 +9,22 @@
     display: block;
     border: none;
 }
-/* Bikeshed gives every svg a white background; the lettering takes the text colour instead. */
+/* Bikeshed gives every svg a white background. */
 .head .nde-logo svg {
-    color: var(--text);
     background: none;
+}
+/* The NDE logo manual: the blue logo on light backgrounds, the white logo on dark ones. */
+.nde-logo-mark {
+    fill: #0a3dfa;
+}
+.nde-logo-wordmark {
+    fill: #231f20;
+}
+@media (prefers-color-scheme: dark) {
+    .nde-logo-mark,
+    .nde-logo-wordmark {
+        fill: #fff;
+    }
 }
 
 /* Tables in the spec’s own content: striped rows, and code that wraps instead of widening a column. */
