@@ -1,0 +1,8 @@
+{
+  "name": "spec-boilerplate",
+  "private": true,
+  "description": "Pins the tools that build NDE Bikeshed specifications, so Dependabot can update them",
+  "dependencies": {
+    "@lde/docgen": "^0.7.0"
+  }
+}

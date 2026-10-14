@@ -24,16 +24,22 @@ jobs:
         with:
           node-version: lts/*
 
-      - name: Render .liquid template files
-        if: ${{ hashFiles('**/*.liquid') != '' }}
-        run: |
-          set -e
-          frame_opt=""
-          [[ -f shacl.frame.jsonld ]] && frame_opt="-f shacl.frame.jsonld"
-          for template_file in $(find . -name '*.liquid' -type f); do
-            output_file="${template_file%.liquid}"
-            npx --yes @lde/docgen@latest from-shacl $frame_opt shacl.ttl "$template_file" > "$output_file"
-          done
+      # The logo, house style and template rendering come from this repository at
+      # the commit the spec calls this workflow with (`spec.yml@<tag>`), so a spec
+      # that pins a version gets the matching boilerplate.
+      - name: Check out the spec boilerplate
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: .nde-workflows
+
+      - name: Copy the boilerplate and render templates
+        uses: ./.nde-workflows/spec-boilerplate
+
+      # The whole working directory is published, so keep the checkout out of it.
+      - name: Remove the boilerplate checkout
+        run: rm -rf .nde-workflows
 
       - name: Render Mermaid diagrams
         if: ${{ hashFiles('**/*.mmd') != '' }}

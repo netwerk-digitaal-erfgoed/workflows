@@ -1,0 +1,37 @@
+<style>
+/* NDE house style for Bikeshed specifications, from @nde/spec-boilerplate. */
+
+.head [data-fill-with="logo"] {
+    float: right;
+    margin: 0 0 1em 1em;
+}
+.head .nde-logo {
+    display: block;
+    border: none;
+}
+/* Bikeshed gives every svg a white background; the lettering takes the text colour instead. */
+.head .nde-logo svg {
+    color: var(--text);
+    background: none;
+}
+
+/* Tables in the spec’s own content: striped rows, and code that wraps instead of widening a column. */
+main table {
+    border-collapse: collapse;
+}
+main table th,
+main table td {
+    padding: 0.5em 0.75em;
+    text-align: left;
+    vertical-align: top;
+}
+main table thead th {
+    border-bottom: 2px solid var(--text);
+}
+main table tbody tr:nth-child(even) {
+    background: var(--tocsidebar-bg);
+}
+main table code {
+    overflow-wrap: anywhere;
+}
+</style>

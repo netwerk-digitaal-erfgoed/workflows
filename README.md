@@ -54,6 +54,13 @@ public/context.jsonld  →  https://<pages-domain>/<repo>/context.jsonld
 The feature is opt-in: repositories without a `public/` directory are unaffected. The built spec
 itself is unchanged – only the extra files are added.
 
+#### NDE logo and house style
+
+The workflow builds every spec with [`spec-boilerplate`](spec-boilerplate/) from the same commit as
+the workflow itself: the NDE logo and house style, and Liquid templates rendered with a pinned docgen.
+A spec that calls `spec.yml@<tag>` therefore gets the matching boilerplate, and its local `make spec`
+downloads the same version.
+
 ### [`dependabot-auto-merge.yml`](.github/workflows/dependabot-auto-merge.yml)
 
 Automatically squash-merges Dependabot pull requests.
@@ -175,6 +182,11 @@ updates:
           - 'nx'
           - '@nx/*'
 ```
+
+## Versions
+
+Releases are tagged `vX.Y.Z`. Callers can pin a tag instead of `@main`, and Dependabot then proposes
+each new version as a pull request.
 
 ## Dependabot
 
