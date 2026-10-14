@@ -16,7 +16,9 @@ NDE_RENDERED := $(NDE_TEMPLATES:.liquid=)
 NDE_FRAME := $(if $(wildcard shacl.frame.jsonld),-f shacl.frame.jsonld)
 
 .DELETE_ON_ERROR:
-.PHONY: help ci spec watch update boilerplate templates nde-force
+# Templates are rendered on every build, like the Bikeshed run itself, so a new
+# docgen or partial always shows up.
+.PHONY: help ci spec watch boilerplate templates $(NDE_RENDERED)
 
 help:
 	@echo "Generate HTML from a Bikeshed source document:"
@@ -33,34 +35,26 @@ spec: boilerplate templates
 watch: boilerplate templates
 	docker run --rm -v "$(CURDIR):/spec" -w /spec $(BIKESHED_IMAGE) sh -c "bikeshed watch"
 
-# The spec’s Makefile keeps one copy per pinned version, so a pinned spec never needs this.
-update:
-	rm -rf .nde
-
 # Bikeshed reads logo.include through ‘Local Boilerplate: logo yes’, and the
 # spec includes nde.include; both must sit next to the spec. A spec that tracks
-# its own file of that name keeps it.
+# its own file of that name in git keeps it.
 boilerplate: logo.include nde.include
 
 logo.include nde.include: %: $(NDE_SPEC_BOILERPLATE)/boilerplate/%
-	@if git ls-files --error-unmatch $@ > /dev/null 2>&1; then \
-		echo "Keeping the spec’s own $@"; \
-	else \
-		cp $< $@; \
+	@if [ ! -e "$@" ] || ! git ls-files --error-unmatch "$@" > /dev/null 2>&1; then \
+		cp "$<" "$@"; \
 	fi
 
-# Rendered on every build, like Bikeshed itself, so a new docgen or partial
-# always shows up. docgen is only installed when the spec has templates.
+# docgen is only installed when the spec has templates, and again when its lockfile changes.
 templates: $(NDE_RENDERED)
 
-$(NDE_RENDERED): %: %.liquid nde-force | $(NDE_DOCGEN)
-	$(NDE_DOCGEN) from-shacl $(NDE_FRAME) shacl.ttl $< > $@
-	@if grep -nF '[object Object]' $@; then \
+$(NDE_RENDERED): %: %.liquid | $(NDE_DOCGEN)
+	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) shacl.ttl "$<" > "$@"
+	@if grep -nF '[object Object]' "$@"; then \
 		echo "$@ contains ‘[object Object]’: a Liquid template printed an object." >&2; \
 		exit 1; \
 	fi
 
-$(NDE_DOCGEN):
-	npm ci --prefix $(NDE_SPEC_BOILERPLATE) --no-audit --no-fund
-
-nde-force:
+$(NDE_DOCGEN): $(NDE_SPEC_BOILERPLATE)/package-lock.json
+	npm ci --prefix "$(NDE_SPEC_BOILERPLATE)" --no-audit --no-fund
+	touch "$@"

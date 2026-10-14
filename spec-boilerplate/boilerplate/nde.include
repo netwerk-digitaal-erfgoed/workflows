@@ -14,20 +14,14 @@
 .head .nde-logo svg {
     background: none;
 }
-/* The NDE logo manual: the blue logo on light backgrounds. In dark mode the
-   logo takes the page’s text colour: white on Bikeshed’s dark background, or
-   black (the manual’s black logo) in a spec that sets ‘Dark Mode: off’. */
+/* The NDE logo manual: the blue logo on light backgrounds, the white logo on
+   dark ones. light-dark() follows the page’s own colour scheme, so a spec with
+   ‘Dark Mode: off’ keeps the blue logo on its light page. */
 .nde-logo-mark {
-    fill: #0a3dfa;
+    fill: light-dark(#0a3dfa, #fff);
 }
 .nde-logo-wordmark {
-    fill: #231f20;
-}
-@media (prefers-color-scheme: dark) {
-    .nde-logo-mark,
-    .nde-logo-wordmark {
-        fill: var(--text);
-    }
+    fill: light-dark(#231f20, #fff);
 }
 
 /* Tables in the spec’s own content: striped rows, and code that wraps instead of widening a column. */
