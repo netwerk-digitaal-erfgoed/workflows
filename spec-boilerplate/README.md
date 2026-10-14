@@ -3,7 +3,7 @@
 The build, logo and house style that NDE’s [Bikeshed](https://speced.github.io/bikeshed/) specifications share.
 
 * `nde.mk`: the `make spec` and `make watch` targets, and `make ci` for the workflows. They render Liquid templates with [docgen](https://ldelements.org/reference/docgen), then run Bikeshed in Docker.
-* `boilerplate/logo.include`: the NDE logo for the spec’s header. It follows the text colour, so it also works in dark mode.
+* `boilerplate/logo.include`: the NDE logo for the spec’s header, taken from netwerkdigitaalerfgoed.nl. It is blue on light backgrounds and takes the text colour in dark mode, as the NDE logo manual prescribes.
 * `boilerplate/nde.include`: the house style, such as striped table rows.
 * `action.yml`: runs `make ci` in CI. [`spec.yml`](../.github/workflows/spec.yml) uses it; a spec with its own build workflow can call it directly.
 * `package.json`: pins docgen, so Dependabot updates it here once for every spec.
@@ -12,7 +12,11 @@ The build, logo and house style that NDE’s [Bikeshed](https://speced.github.io
 
 A spec uses the version of this folder that its workflow calls: `spec.yml@v1.2.0` or `spec-boilerplate@v1.2.0` gets that tag, `@main` gets the latest.
 Dependabot’s `github-actions` updates propose each new tag as a pull request in the spec’s repository.
-The local build reads the same version from the spec’s workflow files, so it matches CI.
+
+The local build reads the same version from the spec’s workflow files and keeps one copy per version in `.nde/`, so it matches CI and works offline once downloaded.
+A spec that follows a branch such as `main` keeps its local copy until `make update`; CI always uses the branch’s latest commit.
+
+A local build needs git, curl, tar and Docker, and npm when the spec has templates.
 
 ## Use it in a spec
 
@@ -35,6 +39,8 @@ To add it to an existing spec:
    <pre class=include>path: nde.include</pre>
    ```
 
+   A spec that tracks its own `logo.include` or `nde.include` in git keeps it.
+
 3. Add to `.gitignore`:
 
    ```
@@ -54,5 +60,6 @@ To add it to an existing spec:
 ## Templates
 
 `make spec` renders every template with a second extension, such as `index.bs.liquid` to `index.bs` or `diagram.mmd.liquid` to `diagram.mmd`, from the spec’s `shacl.ttl`.
-A file with only `.liquid`, such as `attributes.liquid`, is a partial that templates include, and is not rendered by itself.
+A file with only `.liquid`, such as `attributes.liquid`, is a partial that templates include, and is not rendered by itself; so a partial’s name has no other dot.
+Templates are rendered on every build.
 If the spec has a `shacl.frame.jsonld`, docgen uses it.
