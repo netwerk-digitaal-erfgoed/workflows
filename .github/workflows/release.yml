@@ -1,0 +1,18 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Tags let callers pin a version of these workflows, which Dependabot then updates.
+jobs:
+  release:
+    uses: ./.github/workflows/release-please.yml
+    with:
+      sync-changelog: false
+    secrets: inherit

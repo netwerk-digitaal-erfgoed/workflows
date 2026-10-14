@@ -1,0 +1,19 @@
+name: NDE spec boilerplate
+description: Puts the NDE logo and house style next to a Bikeshed spec and renders its Liquid templates.
+
+inputs:
+  working-directory:
+    description: Directory that holds the spec
+    default: '.'
+
+runs:
+  using: composite
+  steps:
+    - name: Install the pinned tools
+      shell: bash
+      run: npm ci --prefix "$GITHUB_ACTION_PATH" --no-audit --no-fund
+
+    - name: Copy the boilerplate and render templates
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: make -f "$GITHUB_ACTION_PATH/nde.mk" ci
