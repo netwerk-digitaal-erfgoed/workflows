@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.0.0...v1.1.0) (2026-10-15)
+
+
+### Features
+
+* **spec:** build a spec that lives in a subfolder ([#54](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/54)) ([31ea48d](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/31ea48d7f843e7520426db6a285564ec091d9d00))
+
 ## 1.0.0 (2026-10-15)
 
 
