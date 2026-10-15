@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.2.0...v1.2.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **spec-boilerplate:** render templates in a subfolder with docgen 0.7.3 ([#61](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/61)) ([db4dd0f](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/db4dd0f41013eda0766014d9349ca4e677f6cded))
+
 ## [1.2.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.1.1...v1.2.0) (2026-10-15)
 
 
