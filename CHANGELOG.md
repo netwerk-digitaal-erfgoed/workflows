@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.2.1...v1.2.2) (2026-10-15)
+
+
+### Bug Fixes
+
+* **release-please:** don’t fail the run when there is no release PR to merge ([#63](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/63)) ([888a42f](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/888a42ff48fa6bff65160883508723f747350a02))
+
 ## [1.2.1](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.2.0...v1.2.1) (2026-10-15)
 
 
