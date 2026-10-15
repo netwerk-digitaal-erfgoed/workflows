@@ -18,7 +18,7 @@ NDE_FRAME := $(if $(wildcard shacl.frame.jsonld),-f shacl.frame.jsonld)
 .DELETE_ON_ERROR:
 # Templates are rendered on every build, like the Bikeshed run itself, so a new
 # docgen or partial always shows up.
-.PHONY: help ci spec watch boilerplate templates $(NDE_RENDERED)
+.PHONY: help ci spec watch update boilerplate templates logo.include nde.include $(NDE_RENDERED)
 
 help:
 	@echo "Generate HTML from a Bikeshed source document:"
@@ -35,9 +35,18 @@ spec: boilerplate templates
 watch: boilerplate templates
 	docker run --rm -v "$(CURDIR):/spec" -w /spec $(BIKESHED_IMAGE) sh -c "bikeshed watch"
 
+# Deletes the spec’s downloaded copies of this folder, of every version, and has
+# its Makefile download the current one again. Refuses any other copy, such as a
+# checkout of the workflows repository.
+update:
+	@case "$(NDE_SPEC_BOILERPLATE)" in .nde/*) ;; *) echo "make update only refreshes a copy in .nde/" >&2; exit 1;; esac
+	rm -rf .nde
+	$(MAKE) "$(NDE_SPEC_BOILERPLATE)/nde.mk"
+
 # Bikeshed reads logo.include through ‘Local Boilerplate: logo yes’, and the
-# spec includes nde.include; both must sit next to the spec. A spec that tracks
-# its own file of that name in git keeps it.
+# spec includes nde.include; both must sit next to the spec. They are copied on
+# every build, so a new version shows up. A spec that tracks its own file of that
+# name in git keeps it.
 boilerplate: logo.include nde.include
 
 logo.include nde.include: %: $(NDE_SPEC_BOILERPLATE)/boilerplate/%

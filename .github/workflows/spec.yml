@@ -7,6 +7,10 @@ on:
         description: 'Whether to publish the result'
         type: boolean
         default: false
+      working-directory:
+        description: 'The folder that holds the spec, for a repository that keeps it in a subfolder'
+        type: string
+        default: '.'
 
 permissions:
   contents: read
@@ -36,13 +40,16 @@ jobs:
 
       - name: Copy the boilerplate and render templates
         uses: ./.nde-workflows/spec-boilerplate
+        with:
+          working-directory: ${{ inputs.working-directory }}
 
       # The whole working directory is published, so keep the checkout out of it.
       - name: Remove the boilerplate checkout
         run: rm -rf .nde-workflows
 
       - name: Render Mermaid diagrams
-        if: ${{ hashFiles('**/*.mmd') != '' }}
+        if: ${{ hashFiles(format('{0}/**/*.mmd', inputs.working-directory)) != '' }}
+        working-directory: ${{ inputs.working-directory }}
         run: |
           set -e
           # mermaid-cli's bundled puppeteer pins a Chrome build that is not published to
@@ -70,6 +77,10 @@ jobs:
         uses: w3c/spec-prod@v2.14.1
         with:
           VALIDATE_MARKUP: false
+          SOURCE: ${{ inputs.working-directory != '.' && format('{0}/index.bs', inputs.working-directory) || '' }}
+          # spec-prod names the artifact after the source’s folder; one name for
+          # every spec lets a caller’s own publish job download it.
+          ARTIFACT_NAME: spec-prod-result
 
   publish:
     runs-on: ubuntu-latest
@@ -96,9 +107,11 @@ jobs:
         with:
           path: _source
       - name: Copy public/ static files to the site root
+        env:
+          SPEC_DIRECTORY: ${{ inputs.working-directory }}
         run: |
-          if [ -d _source/public ]; then
-            cp -R _source/public/. .
+          if [ -d "_source/$SPEC_DIRECTORY/public" ]; then
+            cp -R "_source/$SPEC_DIRECTORY/public/." .
           fi
           rm -rf _source
 
