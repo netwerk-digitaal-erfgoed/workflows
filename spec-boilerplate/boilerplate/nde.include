@@ -1,5 +1,6 @@
 <style>
-/* NDE house style for Bikeshed specifications, from netwerk-digitaal-erfgoed/workflows. */
+/* NDE house style for Bikeshed specifications, from netwerk-digitaal-erfgoed/workflows.
+   Rules sit inside :where() where they can, so any rule of Bikeshed’s or the spec’s wins. */
 
 .head [data-fill-with="logo"] {
     float: right;
@@ -13,37 +14,32 @@
 .head .nde-logo svg {
     background: none;
 }
-/* The NDE logo manual: the blue logo on light backgrounds, the white logo on dark ones. */
+/* The NDE logo manual: the blue logo on light backgrounds, the white logo on
+   dark ones. light-dark() follows the page’s own colour scheme, so a spec with
+   ‘Dark Mode: off’ keeps the blue logo on its light page. */
 .nde-logo-mark {
-    fill: #0a3dfa;
+    fill: light-dark(#0a3dfa, #fff);
 }
 .nde-logo-wordmark {
-    fill: #231f20;
-}
-@media (prefers-color-scheme: dark) {
-    .nde-logo-mark,
-    .nde-logo-wordmark {
-        fill: #fff;
-    }
+    fill: light-dark(#231f20, #fff);
 }
 
 /* Tables in the spec’s own content: striped rows, and code that wraps instead of widening a column. */
-main table {
+:where(main table) {
     border-collapse: collapse;
 }
-main table th,
-main table td {
+:where(main table th, main table td) {
     padding: 0.5em 0.75em;
     text-align: left;
     vertical-align: top;
 }
-main table thead th {
+:where(main table thead th) {
     border-bottom: 2px solid var(--text);
 }
-main table tbody tr:nth-child(even) {
+:where(main table tbody tr:nth-child(even)) {
     background: var(--tocsidebar-bg);
 }
-main table code {
+:where(main table code) {
     overflow-wrap: anywhere;
 }
 </style>

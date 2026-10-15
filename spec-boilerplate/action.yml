@@ -9,10 +9,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install the pinned tools
-      shell: bash
-      run: npm ci --prefix "$GITHUB_ACTION_PATH" --no-audit --no-fund
-
+    # nde.mk installs docgen itself, and only when the spec has templates.
     - name: Copy the boilerplate and render templates
       shell: bash
       working-directory: ${{ inputs.working-directory }}

@@ -13,16 +13,18 @@ BIKESHED_IMAGE ?= netwerkdigitaalerfgoed/bikeshed:7
 NDE_FIND := find . -not -path '*/node_modules/*' -not -path './.nde*'
 NDE_TEMPLATES := $(shell $(NDE_FIND) -name '*.*.liquid')
 NDE_RENDERED := $(NDE_TEMPLATES:.liquid=)
-NDE_PARTIALS := $(shell $(NDE_FIND) -name '*.liquid')
 NDE_FRAME := $(if $(wildcard shacl.frame.jsonld),-f shacl.frame.jsonld)
 
 .DELETE_ON_ERROR:
-.PHONY: help ci spec watch boilerplate templates
+# Templates are rendered on every build, like the Bikeshed run itself, so a new
+# docgen or partial always shows up.
+.PHONY: help ci spec watch boilerplate templates $(NDE_RENDERED)
 
 help:
 	@echo "Generate HTML from a Bikeshed source document:"
 	@echo "  make spec    Generate HTML"
 	@echo "  make watch   Generate HTML each time the source changes"
+	@echo "  make update  Download the boilerplate again, for a spec that follows a branch"
 
 # The entry point for CI. Keep its name stable: workflows of every version call it.
 ci: boilerplate templates
@@ -34,17 +36,25 @@ watch: boilerplate templates
 	docker run --rm -v "$(CURDIR):/spec" -w /spec $(BIKESHED_IMAGE) sh -c "bikeshed watch"
 
 # Bikeshed reads logo.include through ‘Local Boilerplate: logo yes’, and the
-# spec includes nde.include; both must sit next to the spec.
+# spec includes nde.include; both must sit next to the spec. A spec that tracks
+# its own file of that name in git keeps it.
 boilerplate: logo.include nde.include
 
 logo.include nde.include: %: $(NDE_SPEC_BOILERPLATE)/boilerplate/%
-	cp $< $@
+	@if [ ! -e "$@" ] || ! git ls-files --error-unmatch "$@" > /dev/null 2>&1; then \
+		cp "$<" "$@"; \
+	fi
 
+# docgen is only installed when the spec has templates, and again when its lockfile changes.
 templates: $(NDE_RENDERED)
 
-$(NDE_RENDERED): %: %.liquid $(NDE_PARTIALS) $(wildcard shacl.ttl shacl.frame.jsonld)
-	$(NDE_DOCGEN) from-shacl $(NDE_FRAME) shacl.ttl $< > $@
-	@if grep -nF '[object Object]' $@; then \
+$(NDE_RENDERED): %: %.liquid | $(NDE_DOCGEN)
+	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) shacl.ttl "$<" > "$@"
+	@if grep -nF '[object Object]' "$@"; then \
 		echo "$@ contains ‘[object Object]’: a Liquid template printed an object." >&2; \
 		exit 1; \
 	fi
+
+$(NDE_DOCGEN): $(NDE_SPEC_BOILERPLATE)/package-lock.json
+	npm ci --prefix "$(NDE_SPEC_BOILERPLATE)" --no-audit --no-fund
+	touch "$@"
