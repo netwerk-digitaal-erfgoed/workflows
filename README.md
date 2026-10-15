@@ -75,6 +75,22 @@ jobs:
     secrets: inherit
 ```
 
+By default it uses GitHub’s auto-merge, which waits for the required checks and needs auto-merge enabled on the repository.
+A repository without either, such as a spec created from requirements-template, runs it after its own checks and merges right away:
+
+```yaml
+jobs:
+  validate:
+    uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/spec.yml@v1.2.0
+
+  auto-merge:
+    needs: validate
+    uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/dependabot-auto-merge.yml@v1.2.0
+    with:
+      merge-immediately: true
+    secrets: inherit
+```
+
 ### [`release-please.yml`](.github/workflows/release-please.yml)
 
 Runs [Release Please](https://github.com/googleapis/release-please) to automate releases.

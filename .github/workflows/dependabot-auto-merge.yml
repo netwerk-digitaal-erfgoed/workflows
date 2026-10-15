@@ -3,6 +3,11 @@ name: Auto-merge Dependabot PRs
 on:
   pull_request:
   workflow_call:
+    inputs:
+      merge-immediately:
+        description: 'Merge right away instead of when the required checks pass; for a caller that runs this job after its own checks'
+        type: boolean
+        default: false
     secrets:
       GH_APP_ID:
         required: true
@@ -25,8 +30,15 @@ jobs:
           app-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
+      # --auto waits for the required checks, and needs auto-merge enabled on the repository.
       - name: Merge PR
-        run: gh pr merge --auto --squash "$PR_URL"
+        run: |
+          if [ "$MERGE_IMMEDIATELY" = true ]; then
+            gh pr merge --squash "$PR_URL"
+          else
+            gh pr merge --auto --squash "$PR_URL"
+          fi
         env:
+          MERGE_IMMEDIATELY: ${{ inputs.merge-immediately }}
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
