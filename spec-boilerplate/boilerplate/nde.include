@@ -36,8 +36,10 @@
 :where(main table thead th) {
     border-bottom: 2px solid var(--text);
 }
+/* Black on light pages and white on dark ones, at a strength that shows on both.
+   Bikeshed’s own sidebar colour is all but invisible on its black background. */
 :where(main table tbody tr:nth-child(even)) {
-    background: var(--tocsidebar-bg);
+    background: light-dark(rgb(0 0 0 / 6%), rgb(255 255 255 / 10%));
 }
 :where(main table code) {
     overflow-wrap: anywhere;
