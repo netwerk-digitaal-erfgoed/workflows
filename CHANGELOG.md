@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.1.0...v1.1.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **spec-boilerplate:** make table stripes visible in light and dark mode ([#57](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/57)) ([0135ce6](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/0135ce6cd0833c5208f3e064081a1b7f14b60553))
+
 ## [1.1.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.0.0...v1.1.0) (2026-10-15)
 
 
