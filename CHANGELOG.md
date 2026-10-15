@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.1.1...v1.2.0) (2026-10-15)
+
+
+### Features
+
+* **release-please:** merge the release PR automatically on request ([#59](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/59)) ([714872a](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/714872a121244136fbc26d94cbca27ecc706eac2))
+
 ## [1.1.1](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.1.0...v1.1.1) (2026-10-15)
 
 
