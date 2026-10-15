@@ -10,7 +10,7 @@ The build, logo and house style that NDE’s [Bikeshed](https://speced.github.io
 
 ## Versions
 
-A spec uses the version of this folder that its workflow calls: `spec.yml@v1.2.0` or `spec-boilerplate@v1.2.0` gets that tag, `@main` gets the latest.
+A spec uses the version of this folder that its workflow calls: `spec.yml@v1.1.0` or `spec-boilerplate@v1.1.0` gets that tag, `@main` gets the latest.
 Dependabot’s `github-actions` updates propose each new tag as a pull request in the spec’s repository.
 
 The local build reads the same version from the spec’s workflow files and keeps one copy per version in `.nde/`, so it matches CI and works offline once downloaded.
@@ -49,13 +49,18 @@ To add it to an existing spec:
    nde.include
    ```
 
-4. If the spec builds with its own workflow instead of `spec.yml`, replace its template rendering with:
+4. A spec in a subfolder of its repository passes that folder to `spec.yml`:
 
    ```yaml
-   - uses: netwerk-digitaal-erfgoed/workflows/spec-boilerplate@v1.2.0
-     with:
-       working-directory: requirements
+   jobs:
+     build:
+       uses: netwerk-digitaal-erfgoed/workflows/.github/workflows/spec.yml@v1.1.0
+       with:
+         working-directory: requirements
    ```
+
+   A spec that publishes somewhere other than GitHub Pages adds its own publish job, which downloads the `spec-prod-result` artifact.
+   A spec with a build workflow of its own can render templates and copy the boilerplate with the `spec-boilerplate` action instead, which takes the same input.
 
 ## Templates
 
