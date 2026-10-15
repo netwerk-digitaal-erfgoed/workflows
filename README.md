@@ -94,6 +94,15 @@ To disable changelog syncing:
       sync-changelog: false
 ```
 
+To release every fix and feature right away, without merging the release PR by hand:
+
+```yaml
+    with:
+      merge-release-pr: true
+```
+
+This repository does that for its own releases.
+
 #### Customising release notes
 
 Release Please generates changelog entries from conventional commit messages. To customise

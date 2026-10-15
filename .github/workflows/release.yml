@@ -10,9 +10,12 @@ permissions:
   pull-requests: write
 
 # Tags let callers pin a version of these workflows, which Dependabot then updates.
+# Every fix or feature is released right away: each caller’s Dependabot pull request
+# tests a new version before the caller uses it.
 jobs:
   release:
     uses: ./.github/workflows/release-please.yml
     with:
       sync-changelog: false
+      merge-release-pr: true
     secrets: inherit

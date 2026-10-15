@@ -11,6 +11,10 @@ on:
         description: 'Directory containing the spec files (version.txt, CHANGELOG.md, index.bs)'
         type: string
         default: '.'
+      merge-release-pr:
+        description: 'Whether to merge the release PR as soon as it is opened or updated, so every releasable change is released'
+        type: boolean
+        default: false
     secrets:
       GH_APP_ID:
         required: true
@@ -34,8 +38,18 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
       - uses: googleapis/release-please-action@v5
+        id: release
         with:
           token: ${{ steps.app-token.outputs.token }}
+
+      # Merging with the app token pushes to main, which runs this workflow again;
+      # release-please then tags the release.
+      - name: Merge the release PR
+        if: inputs.merge-release-pr && steps.release.outputs.prs_created == 'true'
+        run: gh pr merge --squash "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+        env:
+          PR_NUMBER: ${{ fromJSON(steps.release.outputs.pr).number }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
   sync-changelog:
     runs-on: ubuntu-latest
