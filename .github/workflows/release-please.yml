@@ -46,9 +46,11 @@ jobs:
       # release-please then tags the release.
       - name: Merge the release PR
         if: inputs.merge-release-pr && steps.release.outputs.prs_created == 'true'
-        run: gh pr merge --squash "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+        # The runner evaluates env even when the step is skipped, so parse the PR here,
+        # where an empty output cannot fail the run.
+        run: gh pr merge --squash "$(jq -r .number <<< "$RELEASE_PR")" --repo "$GITHUB_REPOSITORY"
         env:
-          PR_NUMBER: ${{ fromJSON(steps.release.outputs.pr).number }}
+          RELEASE_PR: ${{ steps.release.outputs.pr }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
   sync-changelog:
