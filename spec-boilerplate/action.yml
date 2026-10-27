@@ -1,5 +1,5 @@
 name: NDE spec boilerplate
-description: Puts the NDE logo and house style next to a Bikeshed spec and renders its Liquid templates.
+description: Puts the NDE logo, house style and shared Liquid partials (nde-*.liquid) next to a Bikeshed spec and renders its Liquid templates.
 
 inputs:
   working-directory:

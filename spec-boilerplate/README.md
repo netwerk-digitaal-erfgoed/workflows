@@ -71,7 +71,8 @@ A file with only `.liquid`, such as `attributes.liquid`, is a partial that templ
 Templates are rendered on every build.
 If the spec has a `shacl.frame.jsonld`, docgen uses it.
 
-The build copies the partials in [`partials/`](partials) next to the spec, like the includes, so templates render them by name. A spec that tracks its own file of the same name in git keeps it.
+The build copies the partials in [`partials/`](partials) next to the spec, like the includes, so templates next to the spec render them by name. A template in a subfolder can’t, because docgen only looks in the template’s own folder.
+To override a partial, track your own file of the same name in git. Because of the `nde-*.liquid` line in `.gitignore`, add it with `git add -f`; an untracked file of that name is overwritten on every build.
 
 * `nde-cardinality-and-usage`: the Cardinality and Usage cells of a row in a table of a node shape’s properties, including what an `nde:futureChange` changes in which version.
   Pass the row’s property shape and the node shape:

@@ -47,20 +47,23 @@ update:
 
 # Bikeshed reads logo.include through ‘Local Boilerplate: logo yes’, and the
 # spec includes nde.include; both must sit next to the spec. Templates render the
-# shared partials (nde-*.liquid) by name, which docgen looks up next to the
-# template. They are copied on every build, so a new version shows up. A spec
-# that tracks its own file of that name in git keeps it.
+# shared partials (nde-*.liquid) by name, which docgen looks up in the template’s
+# own folder, so only templates next to the spec can render them. All are copied
+# on every build, so a new version shows up. A spec that tracks its own file of
+# that name in git keeps it; any other file of that name is overwritten.
 boilerplate: logo.include nde.include $(NDE_PARTIALS)
 
+define NDE_COPY_UNLESS_TRACKED
+@if [ ! -e "$@" ] || ! git ls-files --error-unmatch "$@" > /dev/null 2>&1; then \
+	cp "$<" "$@"; \
+fi
+endef
+
 logo.include nde.include: %: $(NDE_SPEC_BOILERPLATE)/boilerplate/%
-	@if [ ! -e "$@" ] || ! git ls-files --error-unmatch "$@" > /dev/null 2>&1; then \
-		cp "$<" "$@"; \
-	fi
+	$(NDE_COPY_UNLESS_TRACKED)
 
 $(NDE_PARTIALS): %: $(NDE_SPEC_BOILERPLATE)/partials/%
-	@if [ ! -e "$@" ] || ! git ls-files --error-unmatch "$@" > /dev/null 2>&1; then \
-		cp "$<" "$@"; \
-	fi
+	$(NDE_COPY_UNLESS_TRACKED)
 
 # docgen is only installed when the spec has templates, and again when its lockfile changes.
 templates: $(NDE_RENDERED)
