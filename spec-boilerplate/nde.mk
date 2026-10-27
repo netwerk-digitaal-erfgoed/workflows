@@ -58,7 +58,7 @@ logo.include nde.include: %: $(NDE_SPEC_BOILERPLATE)/boilerplate/%
 templates: $(NDE_RENDERED)
 
 $(NDE_RENDERED): %: %.liquid | $(NDE_DOCGEN)
-	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) shacl.ttl "$<" > "$@"
+	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) --partials "$(NDE_SPEC_BOILERPLATE)/partials" shacl.ttl "$<" > "$@"
 	@if grep -nF '[object Object]' "$@"; then \
 		echo "$@ contains ‘[object Object]’: a Liquid template printed an object." >&2; \
 		exit 1; \

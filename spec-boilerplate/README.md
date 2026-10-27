@@ -5,6 +5,7 @@ The build, logo and house style that NDE’s [Bikeshed](https://speced.github.io
 * `nde.mk`: the `make spec` and `make watch` targets, and `make ci` for the workflows. They render Liquid templates with [docgen](https://ldelements.org/reference/docgen), then run Bikeshed in Docker.
 * `boilerplate/logo.include`: the NDE logo for the spec’s header, taken from netwerkdigitaalerfgoed.nl. It is blue on light backgrounds and takes the text colour in dark mode, as the NDE logo manual prescribes.
 * `boilerplate/nde.include`: the house style, such as striped table rows.
+* `partials/`: Liquid partials that every spec’s templates can render, such as the cells of an attribute table. See [Templates](#templates).
 * `action.yml`: runs `make ci` in CI. [`spec.yml`](../.github/workflows/spec.yml) uses it; a spec with its own build workflow can call it directly.
 * `package.json`: pins docgen, so Dependabot updates it here once for every spec.
 
@@ -68,3 +69,23 @@ To add it to an existing spec:
 A file with only `.liquid`, such as `attributes.liquid`, is a partial that templates include, and is not rendered by itself; so a partial’s name has no other dot.
 Templates are rendered on every build.
 If the spec has a `shacl.frame.jsonld`, docgen uses it.
+
+Templates can also render the partials in [`partials/`](partials) by name, as if they sat next to them; a partial of the same name in the spec wins.
+
+* `cardinality-and-usage`: the Cardinality and Usage cells of a row in a table of a node shape’s properties, including what an `nde:futureChange` changes in which version.
+  Pass the row’s property shape and the node shape:
+
+  ```liquid
+  <tr>
+      <th scope="row">{{ property.path }}</th>
+      {% render 'cardinality-and-usage', property: property, nodeShape: nodeShape -%}
+  </tr>
+  ```
+
+  The `-%}` trims the caller’s own line break after the cells, which would otherwise leave a blank line in the table.
+
+  Usage is Required for an `sh:minCount` that is a violation, Recommended for one that is a warning, and Optional otherwise; pass `optional: 'Recommended'` to call those Recommended too.
+  Future changes call an identifier an IRI; pass `iri: 'URI'` for a spec that says URI.
+  Pass `combined: true` for a single Usage cell that also says how many values are allowed in words, such as ‘Required, one or more’, instead of a separate Cardinality cell.
+  Pass `part: 'value-note'` to get only the change to what the values must be, such as “v2.0: must be IRI”, to show next to an expected value; with `combined`, the Usage cell then leaves it out.
+  Each future change links to a section with the id `v` and its major version, such as `#v2`, which the spec has to have.

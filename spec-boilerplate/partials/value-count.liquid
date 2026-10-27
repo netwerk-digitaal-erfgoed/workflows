@@ -1,0 +1,20 @@
+{%- comment -%}
+    Says in words how many values a property takes, from `min` and `max`, such as
+    “one or more” or “at most one”, or “any number” when there is no bound. With
+    `uniqueLang`, an unbounded number is one per language.
+{%- endcomment -%}
+{%- assign minimum = min | default: 0 -%}
+{%- if uniqueLang and max == nil or uniqueLang and max == "n" -%}
+    {%- if minimum == 0 -%}at most one per language{%- else -%}one per language{%- endif -%}
+{%- elsif max == nil or max == "n" -%}
+    {%- if minimum == 1 -%}one or more
+    {%- elsif minimum > 1 -%}at least {{ minimum }}
+    {%- else -%}any number
+    {%- endif -%}
+{%- elsif minimum == max -%}
+    {%- if max == 1 -%}exactly one{%- else -%}exactly {{ max }}{%- endif -%}
+{%- elsif minimum == 0 -%}
+    {%- if max == 1 -%}at most one{%- else -%}at most {{ max }}{%- endif -%}
+{%- else -%}
+    {{ minimum }} to {{ max }}
+{%- endif -%}
