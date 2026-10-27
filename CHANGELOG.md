@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.3.0...v1.4.0) (2026-10-27)
+
+
+### Features
+
+* **spec-boilerplate:** show every future change on a path in the Usage cell ([#68](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/68)) ([d6342c3](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/d6342c3517eb1c3352da443756d4bd14ccf3175e))
+
 ## [1.3.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.2.2...v1.3.0) (2026-10-27)
 
 
