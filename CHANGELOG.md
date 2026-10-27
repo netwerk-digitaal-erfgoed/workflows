@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.2.2...v1.3.0) (2026-10-27)
+
+
+### Features
+
+* **spec-boilerplate:** share the cells of attribute tables between specs ([#66](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/66)) ([44529b4](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/44529b4f748e9d06ac71096c40e7e9f6e98cdefd))
+
 ## [1.2.2](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.2.1...v1.2.2) (2026-10-15)
 
 
