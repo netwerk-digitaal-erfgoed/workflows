@@ -12,6 +12,7 @@
     `part: 'value-note'` to get only that change, to show next to the expected value.
 {%- endcomment -%}
 {%- assign iri = iri | default: "IRI" -%}
+{%- assign label_lang = lang | default: "en" -%}
 {%- assign alternatives = '' -%}
 {%- for or_list in nodeShape.or -%}
     {%- assign or_paths = or_list | map: 'property' | map: 'path' -%}
@@ -141,7 +142,7 @@
             {%- if has_iri_alt and has_date_alt -%}
                 {% assign future_text = iri | prepend: "must be valid ISO 8601 or " -%}
             {%- endif -%}
-        {% elsif change.severity == "Violation" and property.not.pattern -%}
+        {% elsif change.severity == "Violation" and property.not.pattern and change['rdfs:label'] == nil -%}
             {%- assign not_pattern = property.not.pattern -%}
             {%- if not_pattern contains "https?" or not_pattern contains "http" -%}
                 {% assign future_text = iri | append: "s not allowed" -%}
@@ -149,6 +150,29 @@
         {% endif -%}
         {% assign value_text = future_text -%}
         {% if usage_change -%}{% assign value_text = "" -%}{% endif -%}
+        {%- comment -%}
+            The row keeps the nde:futureChange of one shape only, while a path can have
+            several, each in a shape of its own. A change that its constraint can’t
+            describe, such as an sh:not rule, names itself in rdfs:label: add the label
+            of every such change on the path, and an sh:maxCount that only gets stricter.
+        {%- endcomment -%}
+        {%- for shape in nodeShape.property -%}
+            {%- if shape.path != property.path or shape['nde:futureChange'] == nil -%}{%- continue -%}{%- endif -%}
+            {%- assign shape_change = shape['nde:futureChange'] -%}
+            {%- assign change_label = shape_change['rdfs:label'] | lang: label_lang -%}
+            {%- if change_label != "" and change_label != nil -%}
+                {%- unless value_text contains change_label -%}
+                    {%- if value_text == "" -%}{%- assign value_text = change_label -%}{%- else -%}{%- assign value_text = value_text | append: "; " | append: change_label -%}{%- endif -%}
+                    {%- if future_text == "" -%}{%- assign future_text = change_label -%}{%- else -%}{%- assign future_text = future_text | append: "; " | append: change_label -%}{%- endif -%}
+                {%- endunless -%}
+            {%- elsif shape_change.severity == "Violation" and shape.maxCount and shape.maxCount != 0 and shape.minCount == nil and becomes_required != true -%}
+                {%- comment -%} When the property becomes required, the cardinality already shows its maximum. {%- endcomment -%}
+                {%- assign max_label = shape.maxCount | prepend: "max " -%}
+                {%- unless future_text contains max_label -%}
+                    {%- if future_text == "" -%}{%- assign future_text = max_label -%}{%- else -%}{%- assign future_text = future_text | append: "; " | append: max_label -%}{%- endif -%}
+                {%- endunless -%}
+            {%- endif -%}
+        {%- endfor -%}
         {% if becomes_required -%}
             {% if future_text == "" -%}
                 {% assign future_text = "becomes required" -%}

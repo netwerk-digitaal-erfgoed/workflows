@@ -90,5 +90,6 @@ To override a partial, track your own file of the same name in git. Because of t
   Future changes call an identifier an IRI; pass `iri: 'URI'` for a spec that says URI.
   Pass `combined: true` for a single Usage cell that also says how many values are allowed in words, such as ‘Required, one or more’, instead of a separate Cardinality cell.
   Pass `part: 'value-note'` to get only the change to what the values must be, such as “v2.0: must be IRI”, to show next to an expected value; with `combined`, the Usage cell then leaves it out.
+  A path can have several future changes, each in a property shape of its own, while the row shows that of one shape. Give a change that its constraints can’t describe, such as an `sh:not` rule, an `rdfs:label` on its `nde:futureChange`, such as “no x- media type”, and the Usage cell lists the label of every such change on the path. Labels are read in English; pass `lang: 'nl'` for another language.
   Each future change links to a section with the id `v` and its major version, such as `#v2`, which the spec has to have.
 * `nde-value-count`: how many values a property takes, in words, such as “one or more”, from `min`, `max` and `uniqueLang`. `nde-cardinality-and-usage` uses it.
