@@ -96,9 +96,10 @@ jobs:
         with:
           name: spec-prod-result
 
-      # Bikeshed includes these at build time; they are not part of the site.
+      # Bikeshed includes these and docgen renders the shared partials at build
+      # time; they are not part of the site.
       - name: Remove the boilerplate includes
-        run: rm -f logo.include nde.include
+        run: rm -f logo.include nde.include nde-*.liquid
 
       # Publish repo-level static files (e.g. a hosted JSON-LD context) alongside the
       # built spec. Opt-in: only repos with a public/ directory are affected; its

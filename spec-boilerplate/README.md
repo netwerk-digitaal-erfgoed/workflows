@@ -5,7 +5,7 @@ The build, logo and house style that NDE’s [Bikeshed](https://speced.github.io
 * `nde.mk`: the `make spec` and `make watch` targets, and `make ci` for the workflows. They render Liquid templates with [docgen](https://ldelements.org/reference/docgen), then run Bikeshed in Docker.
 * `boilerplate/logo.include`: the NDE logo for the spec’s header, taken from netwerkdigitaalerfgoed.nl. It is blue on light backgrounds and takes the text colour in dark mode, as the NDE logo manual prescribes.
 * `boilerplate/nde.include`: the house style, such as striped table rows.
-* `partials/`: Liquid partials that every spec’s templates can render, such as the cells of an attribute table. See [Templates](#templates).
+* `partials/`: Liquid partials that every spec’s templates can render, such as the cells of an attribute table. Their names start with `nde-`. See [Templates](#templates).
 * `action.yml`: runs `make ci` in CI. [`spec.yml`](../.github/workflows/spec.yml) uses it; a spec with its own build workflow can call it directly.
 * `package.json`: pins docgen, so Dependabot updates it here once for every spec.
 
@@ -48,6 +48,7 @@ To add it to an existing spec:
    .nde/
    logo.include
    nde.include
+   nde-*.liquid
    ```
 
 4. A spec in a subfolder of its repository passes that folder to `spec.yml`:
@@ -70,15 +71,15 @@ A file with only `.liquid`, such as `attributes.liquid`, is a partial that templ
 Templates are rendered on every build.
 If the spec has a `shacl.frame.jsonld`, docgen uses it.
 
-Templates can also render the partials in [`partials/`](partials) by name, as if they sat next to them; a partial of the same name in the spec wins.
+The build copies the partials in [`partials/`](partials) next to the spec, like the includes, so templates render them by name. A spec that tracks its own file of the same name in git keeps it.
 
-* `cardinality-and-usage`: the Cardinality and Usage cells of a row in a table of a node shape’s properties, including what an `nde:futureChange` changes in which version.
+* `nde-cardinality-and-usage`: the Cardinality and Usage cells of a row in a table of a node shape’s properties, including what an `nde:futureChange` changes in which version.
   Pass the row’s property shape and the node shape:
 
   ```liquid
   <tr>
       <th scope="row">{{ property.path }}</th>
-      {% render 'cardinality-and-usage', property: property, nodeShape: nodeShape -%}
+      {% render 'nde-cardinality-and-usage', property: property, nodeShape: nodeShape -%}
   </tr>
   ```
 
@@ -89,3 +90,4 @@ Templates can also render the partials in [`partials/`](partials) by name, as if
   Pass `combined: true` for a single Usage cell that also says how many values are allowed in words, such as ‘Required, one or more’, instead of a separate Cardinality cell.
   Pass `part: 'value-note'` to get only the change to what the values must be, such as “v2.0: must be IRI”, to show next to an expected value; with `combined`, the Usage cell then leaves it out.
   Each future change links to a section with the id `v` and its major version, such as `#v2`, which the spec has to have.
+* `nde-value-count`: how many values a property takes, in words, such as “one or more”, from `min`, `max` and `uniqueLang`. `nde-cardinality-and-usage` uses it.

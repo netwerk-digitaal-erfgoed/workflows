@@ -14,11 +14,13 @@ NDE_FIND := find . -not -path '*/node_modules/*' -not -path './.nde*'
 NDE_TEMPLATES := $(shell $(NDE_FIND) -name '*.*.liquid')
 NDE_RENDERED := $(NDE_TEMPLATES:.liquid=)
 NDE_FRAME := $(if $(wildcard shacl.frame.jsonld),-f shacl.frame.jsonld)
+# Shared partials that templates render by name; see the boilerplate target.
+NDE_PARTIALS := $(notdir $(wildcard $(NDE_SPEC_BOILERPLATE)/partials/nde-*.liquid))
 
 .DELETE_ON_ERROR:
 # Templates are rendered on every build, like the Bikeshed run itself, so a new
 # docgen or partial always shows up.
-.PHONY: help ci spec watch update boilerplate templates logo.include nde.include $(NDE_RENDERED)
+.PHONY: help ci spec watch update boilerplate templates logo.include nde.include $(NDE_PARTIALS) $(NDE_RENDERED)
 
 help:
 	@echo "Generate HTML from a Bikeshed source document:"
@@ -44,12 +46,18 @@ update:
 	$(MAKE) "$(NDE_SPEC_BOILERPLATE)/nde.mk"
 
 # Bikeshed reads logo.include through ‘Local Boilerplate: logo yes’, and the
-# spec includes nde.include; both must sit next to the spec. They are copied on
-# every build, so a new version shows up. A spec that tracks its own file of that
-# name in git keeps it.
-boilerplate: logo.include nde.include
+# spec includes nde.include; both must sit next to the spec. Templates render the
+# shared partials (nde-*.liquid) by name, which docgen looks up next to the
+# template. They are copied on every build, so a new version shows up. A spec
+# that tracks its own file of that name in git keeps it.
+boilerplate: logo.include nde.include $(NDE_PARTIALS)
 
 logo.include nde.include: %: $(NDE_SPEC_BOILERPLATE)/boilerplate/%
+	@if [ ! -e "$@" ] || ! git ls-files --error-unmatch "$@" > /dev/null 2>&1; then \
+		cp "$<" "$@"; \
+	fi
+
+$(NDE_PARTIALS): %: $(NDE_SPEC_BOILERPLATE)/partials/%
 	@if [ ! -e "$@" ] || ! git ls-files --error-unmatch "$@" > /dev/null 2>&1; then \
 		cp "$<" "$@"; \
 	fi
@@ -57,8 +65,8 @@ logo.include nde.include: %: $(NDE_SPEC_BOILERPLATE)/boilerplate/%
 # docgen is only installed when the spec has templates, and again when its lockfile changes.
 templates: $(NDE_RENDERED)
 
-$(NDE_RENDERED): %: %.liquid | $(NDE_DOCGEN)
-	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) --partials "$(NDE_SPEC_BOILERPLATE)/partials" shacl.ttl "$<" > "$@"
+$(NDE_RENDERED): %: %.liquid | $(NDE_DOCGEN) $(NDE_PARTIALS)
+	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) shacl.ttl "$<" > "$@"
 	@if grep -nF '[object Object]' "$@"; then \
 		echo "$@ contains ‘[object Object]’: a Liquid template printed an object." >&2; \
 		exit 1; \

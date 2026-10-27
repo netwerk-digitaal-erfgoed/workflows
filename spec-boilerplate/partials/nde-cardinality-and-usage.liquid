@@ -77,7 +77,7 @@
             {%- capture future_card %}{{ future_min }}..{{ future_max }}{% endcapture -%}
         {%- endif -%}
         {%- if future_card != current_card -%}
-            {%- capture future_count %}{% render 'value-count', min: future_min, max: future_max, uniqueLang: property.uniqueLang %}{% endcapture -%}
+            {%- capture future_count %}{% render 'nde-value-count', min: future_min, max: future_max, uniqueLang: property.uniqueLang %}{% endcapture -%}
             {%- capture cardinality_note %}<br><small>{{ version_link }}: {{ future_card }}</small>{% endcapture -%}
             {%- capture count_note %}<br><small>{{ version_link }}: {{ future_count }}</small>{% endcapture -%}
         {%- endif -%}
@@ -176,7 +176,7 @@
     {%- comment -%} One cell: the usage with how many values, in words, and one note on what changes. {%- endcomment -%}
     {%- assign count = '' -%}
     {%- unless property.maxCount == 0 or alternatives != '' -%}
-        {%- capture count %}{% render 'value-count', min: current_min, max: property.maxCount, uniqueLang: property.uniqueLang %}{% endcapture -%}
+        {%- capture count %}{% render 'nde-value-count', min: current_min, max: property.maxCount, uniqueLang: property.uniqueLang %}{% endcapture -%}
     {%- endunless -%}
     {%- if usage_note == '' -%}{%- assign usage_note = count_note -%}{%- endif -%}
     <td>{{ usage_label }}{% if count != '' %}, {{ count }}{% endif %}{{ usage_note }}</td>
