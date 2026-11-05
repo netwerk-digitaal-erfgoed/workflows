@@ -4,7 +4,7 @@ The build, logo and house style that NDE’s [Bikeshed](https://speced.github.io
 
 * `nde.mk`: the `make spec` and `make watch` targets, and `make ci` for the workflows. They render Liquid templates with [docgen](https://ldelements.org/reference/docgen), then run Bikeshed in Docker.
 * `boilerplate/logo.include`: the NDE logo for the spec’s header, taken from netwerkdigitaalerfgoed.nl. It is blue on light backgrounds and takes the text colour in dark mode, as the NDE logo manual prescribes.
-* `boilerplate/nde.include`: the house style, such as striped table rows.
+* `boilerplate/nde.include`: the house style, such as striped table rows, and [tabs](#tabs) for alternatives such as the same example in two vocabularies.
 * `partials/`: Liquid partials that every spec’s templates can render, such as the cells of an attribute table. Their names start with `nde-`. See [Templates](#templates).
 * `action.yml`: runs `make ci` in CI. [`spec.yml`](../.github/workflows/spec.yml) uses it; a spec with its own build workflow can call it directly.
 * `package.json`: pins docgen, so Dependabot updates it here once for every spec.
@@ -63,6 +63,32 @@ To add it to an existing spec:
 
    A spec that publishes somewhere other than GitHub Pages adds its own publish job, which downloads the `spec-prod-result` artifact.
    A spec with a build workflow of its own can render templates and copy the boilerplate with the `spec-boilerplate` action instead, which takes the same input.
+
+## Tabs
+
+`nde.include` turns a `<div class="nde-tabs">` into tabs, one for each child with a `data-tab`.
+The `data-tab` identifies the tab and `data-tab-label` is its text; without a label, the tab shows the `data-tab`.
+A `data-label` on the group names the tab list for screen readers:
+
+```html
+<div class="nde-tabs" data-tabs="syntax" data-label="Syntax">
+<pre highlight=json-ld data-tab="jsonld" data-tab-label="JSON-LD">
+    { "@context": "https://schema.org/", "@type": "Dataset" }
+</pre>
+<pre highlight=turtle data-tab="turtle" data-tab-label="Turtle">
+    [] a <https://schema.org/Dataset> .
+</pre>
+</div>
+```
+
+A panel can be any element, such as a `<div>` around an attribute table or around a `<pre class=include-code>`, which drops data attributes.
+
+Groups with the same `data-tabs` switch together: picking a tab switches every group of that name that has a tab with the same `data-tab`, and the browser remembers it for the next visit, per name.
+So a spec can switch its examples between vocabularies with one name and between syntaxes with another.
+A group without `data-tabs` switches on its own and is not remembered.
+On a first visit, each group shows its first tab.
+The choice is remembered per site, not per spec, so specs on the same site that use the same name start on the same tab.
+A link to something inside a tab that is not shown switches to that tab, without changing the remembered choice.
 
 ## Templates
 

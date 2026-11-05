@@ -45,3 +45,180 @@
     overflow-wrap: anywhere;
 }
 </style>
+
+<style>
+/* Tabs that show one of several alternatives, such as the same example in two vocabularies; see the README. */
+:where(.nde-tablist) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid var(--example-border);
+}
+:where(.nde-tablist [role="tab"]) {
+    margin-bottom: -1px;
+    padding: 0.25em 0.75em;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+}
+:where(.nde-tablist [role="tab"][aria-selected="true"]) {
+    border-bottom-color: var(--a-normal-text);
+    color: var(--a-normal-text);
+    font-weight: bold;
+}
+:where(.nde-tablist [role="tab"]:focus-visible, .nde-tabs > [role="tabpanel"]:focus-visible) {
+    outline: 2px solid var(--a-normal-text);
+    outline-offset: 2px;
+}
+/* Beats Bikeshed’s display: grid on line-numbered code blocks. */
+.nde-tabs > [data-tab][hidden] {
+    display: none !important;
+}
+</style>
+
+<script>
+// Turns each .nde-tabs group into tabs, one for each child with a data-tab.
+// Groups with the same data-tabs name switch together, and the browser
+// remembers the choice for that name.
+(() => {
+  const storagePrefix = 'nde-tabs-';
+  const groupsByName = new Map();
+  const panelGroups = new Map();
+  // Name of a group → data-tab of its remembered tab.
+  const remembered = new Map();
+  try {
+    for (let index = 0; index < localStorage.length; index++) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(storagePrefix)) {
+        remembered.set(key.slice(storagePrefix.length), localStorage.getItem(key));
+      }
+    }
+  } catch {}
+
+  // Hide the other panels before the page renders, so a deep link does not land
+  // on content that is about to disappear. A group shows its remembered tab if
+  // it has one, and its first tab otherwise.
+  const rememberedGroups = [];
+  const hiddenPanels = [];
+  for (const [name, key] of remembered) {
+    const group = `.nde-tabs[data-tabs="${CSS.escape(name)}"]:has(> [data-tab="${CSS.escape(key)}"])`;
+    rememberedGroups.push(group);
+    hiddenPanels.push(`${group} > [data-tab]:not([data-tab="${CSS.escape(key)}"])`);
+  }
+  const otherGroups = rememberedGroups.length === 0 ? '.nde-tabs' : `.nde-tabs:not(${rememberedGroups.join(', ')})`;
+  hiddenPanels.push(`${otherGroups} > [data-tab] ~ [data-tab]`);
+  const initialStyle = document.createElement('style');
+  initialStyle.textContent = `${hiddenPanels.join(',\n')} { display: none !important; }`;
+  document.head.append(initialStyle);
+
+  const show = (group, key) => {
+    for (const { tab, panel } of group) {
+      const selected = tab.dataset.tab === key;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      panel.hidden = !selected;
+    }
+  };
+
+  const hasTab = (group, key) => group.some(({ tab }) => tab.dataset.tab === key);
+
+  // Shows the tab in its group and in every group of the same name that has it.
+  const select = (group, name, key) => {
+    const linked = name === undefined ? [group] : groupsByName.get(name);
+    for (const linkedGroup of linked) {
+      if (hasTab(linkedGroup, key)) show(linkedGroup, key);
+    }
+  };
+
+  // Shows the tab that holds the target of a link, then scrolls to the target.
+  const showTarget = () => {
+    if (!location.hash) return;
+    let id = location.hash.slice(1);
+    try {
+      id = decodeURIComponent(id);
+    } catch {
+      // A malformed escape such as #100% is not a valid ID either way.
+    }
+    const target = document.getElementById(id);
+    if (!target) return;
+    for (let panel = target.closest('.nde-tabs > [hidden]'); panel; panel = panel.parentElement.closest('.nde-tabs > [hidden]')) {
+      select(panelGroups.get(panel), panel.parentElement.dataset.tabs, panel.dataset.tab);
+    }
+    target.scrollIntoView();
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.nde-tabs').forEach((element, groupIndex) => {
+      const name = element.dataset.tabs;
+      const tablist = document.createElement('div');
+      tablist.className = 'nde-tablist';
+      tablist.setAttribute('role', 'tablist');
+      if (element.dataset.label) tablist.setAttribute('aria-label', element.dataset.label);
+      const group = [];
+
+      element.querySelectorAll(':scope > [data-tab]').forEach((panel, panelIndex) => {
+        const key = panel.dataset.tab;
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.id = `nde-tab-${groupIndex}-${panelIndex}`;
+        tab.dataset.tab = key;
+        tab.textContent = panel.dataset.tabLabel || key;
+        tab.setAttribute('role', 'tab');
+        panel.id ||= `nde-tabpanel-${groupIndex}-${panelIndex}`;
+        panel.tabIndex = 0;
+        panel.setAttribute('role', 'tabpanel');
+        panel.setAttribute('aria-labelledby', tab.id);
+        tab.setAttribute('aria-controls', panel.id);
+
+        tab.addEventListener('click', () => {
+          // Keep the clicked tab in place while groups above it change height.
+          const topBefore = tab.getBoundingClientRect().top;
+          select(group, name, key);
+          window.scrollBy(0, tab.getBoundingClientRect().top - topBefore);
+          if (name === undefined) return;
+          try {
+            localStorage.setItem(storagePrefix + name, key);
+          } catch {}
+        });
+        // Arrow keys, Home and End move between tabs, as in the WAI-ARIA tabs pattern.
+        tab.addEventListener('keydown', (event) => {
+          const tabs = [...tablist.children];
+          const index = tabs.indexOf(tab);
+          const nextIndex = {
+            ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+            ArrowRight: (index + 1) % tabs.length,
+            Home: 0,
+            End: tabs.length - 1,
+          }[event.key];
+          if (nextIndex === undefined) return;
+          event.preventDefault();
+          tabs[nextIndex].click();
+          tabs[nextIndex].focus();
+        });
+
+        tablist.append(tab);
+        group.push({ tab, panel });
+        panelGroups.set(panel, group);
+      });
+      if (group.length === 0) return;
+
+      element.prepend(tablist);
+      if (name !== undefined) {
+        if (!groupsByName.has(name)) groupsByName.set(name, []);
+        groupsByName.get(name).push(group);
+      }
+      const stored = remembered.get(name);
+      show(group, hasTab(group, stored) ? stored : group[0].tab.dataset.tab);
+    });
+    initialStyle.remove();
+
+    // The tab bars added height above a deep link’s target.
+    showTarget();
+  });
+  window.addEventListener('hashchange', showTarget);
+})();
+</script>
