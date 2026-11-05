@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.5.2...v1.6.0) (2026-11-05)
+
+
+### Features
+
+* **spec-boilerplate:** show JSON-LD examples in Turtle too ([#77](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/77)) ([d962fb6](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/d962fb6c3f75a642c7f021a4a244cec3aa96dbfe))
+
 ## [1.5.2](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.5.1...v1.5.2) (2026-11-05)
 
 
