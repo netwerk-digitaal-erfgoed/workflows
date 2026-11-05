@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.5.0...v1.5.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **spec-boilerplate:** keep sections in the order of the SHACL file ([#70](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/70)) ([83a0fa8](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/83a0fa884f00c6e1cc98c81d2e420f5c4cbbd406))
+
 ## [1.5.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.4.0...v1.5.0) (2026-11-05)
 
 
