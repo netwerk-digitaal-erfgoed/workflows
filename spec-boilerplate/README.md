@@ -90,6 +90,35 @@ On a first visit, each group shows its first tab.
 The choice is remembered per site, not per spec, so specs on the same site that use the same name start on the same tab.
 A link to something inside a tab that is not shown switches to that tab, without changing the remembered choice.
 
+## Examples in JSON-LD and Turtle
+
+The `nde-example` partial shows a JSON-LD example and the same triples in Turtle as [tabs](#tabs), named `syntax`.
+docgen converts the JSON-LD to Turtle on every build, so the two can’t drift apart:
+
+```liquid
+<div class="example">
+    A creator referenced by an authority record:
+
+    {% render 'nde-example', path: 'examples/CreativeWork-creator.jsonld', lineHighlight: '5-12' %}
+</div>
+```
+
+`lineHighlight` highlights lines of the JSON-LD only, since the Turtle has lines of its own.
+Pass the path as a variable rather than through a filter: Liquid’s `render` doesn’t apply filters to its arguments.
+The build fails on JSON-LD that would lose data in Turtle, such as a term that the context doesn’t map.
+
+Examples usually cite a context on the web, such as `https://schema.org`, which can change at any time.
+Have the spec read it from a file of its own in `nde.config.mk`, next to the spec, so the Turtle shows the triples the spec means:
+
+```make
+NDE_JSONLD_CONTEXTS := https://schema.org=public/context.jsonld
+```
+
+`nde.mk` reads `nde.config.mk` both locally and in CI, where the spec’s own `Makefile` doesn’t run.
+
+To show Turtle written by hand instead, for instance with comments, pass its file as `turtle: 'examples/name.ttl'`.
+Make sure it still has the same triples as the JSON-LD.
+
 ## Templates
 
 `make spec` renders every template with a second extension, such as `index.bs.liquid` to `index.bs` or `diagram.mmd.liquid` to `diagram.mmd`, from the spec’s `shacl.ttl`.
@@ -118,4 +147,5 @@ To override a partial, track your own file of the same name in git. Because of t
   Pass `part: 'value-note'` to get only the change to what the values must be, such as “v2.0: must be IRI”, to show next to an expected value; with `combined`, the Usage cell then leaves it out.
   A path can have several future changes, each in a property shape of its own, while the row shows that of one shape. Give a change that its constraints can’t describe, such as an `sh:not` rule, an `rdfs:label` on its `nde:futureChange`, such as “no x- media type”, and the Usage cell lists the label of every such change on the path. Labels are read in English; pass `lang: 'nl'` for another language.
   Each future change links to a section with the id `v` and its major version, such as `#v2`, which the spec has to have.
+* `nde-example`: a JSON-LD example and the same triples in Turtle as tabs; see [Examples in JSON-LD and Turtle](#examples-in-json-ld-and-turtle).
 * `nde-value-count`: how many values a property takes, in words, such as “one or more”, from `min`, `max` and `uniqueLang`. `nde-cardinality-and-usage` uses it.

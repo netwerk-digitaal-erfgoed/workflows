@@ -5,6 +5,11 @@
 # override targets after it. CI runs the same targets through action.yml.
 
 NDE_SPEC_BOILERPLATE := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+# Settings of the spec’s own, which go in nde.config.mk rather than the spec’s
+# Makefile, because CI runs this file without it. NDE_JSONLD_CONTEXTS, url=file
+# pairs, has the Turtle of the JSON-LD examples (the nde-example partial) read
+# the contexts they cite from the spec’s own files rather than the web.
+-include nde.config.mk
 NDE_DOCGEN := $(NDE_SPEC_BOILERPLATE)/node_modules/.bin/docgen
 BIKESHED_IMAGE ?= netwerkdigitaalerfgoed/bikeshed:7
 
@@ -69,7 +74,7 @@ $(NDE_PARTIALS): %: $(NDE_SPEC_BOILERPLATE)/partials/%
 templates: $(NDE_RENDERED)
 
 $(NDE_RENDERED): %: %.liquid | $(NDE_DOCGEN) $(NDE_PARTIALS)
-	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) shacl.ttl "$<" > "$@"
+	"$(NDE_DOCGEN)" from-shacl $(NDE_FRAME) $(addprefix --context ,$(NDE_JSONLD_CONTEXTS)) shacl.ttl "$<" > "$@"
 	@if grep -nF '[object Object]' "$@"; then \
 		echo "$@ contains ‘[object Object]’: a Liquid template printed an object." >&2; \
 		exit 1; \
