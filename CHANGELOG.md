@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.4.0...v1.5.0) (2026-11-05)
+
+
+### Features
+
+* **spec-boilerplate:** add tabs for alternative examples ([#72](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/72)) ([1a10c8a](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/1a10c8a990d2fa698b25b3d294626e57e05820d3))
+
 ## [1.4.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.3.0...v1.4.0) (2026-10-27)
 
 
