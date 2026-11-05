@@ -1,0 +1,30 @@
+{%- comment -%}
+    Renders a JSON-LD example file and the same triples in Turtle as tabs. Pass
+    the path of the JSON-LD file, and optionally lineHighlight: the lines to
+    highlight in the JSON-LD, such as '5-8'. docgen converts the JSON-LD to
+    Turtle, unless turtle names a file written by hand, such as to add comments.
+{%- endcomment -%}
+<div class="nde-tabs" data-tabs="syntax" data-label="Syntax">
+<div data-tab="jsonld" data-tab-label="JSON-LD">
+<pre class=include-code>
+path: {{ path }}
+highlight: json-ld
+line-numbers: true
+{%- if lineHighlight %}
+line-highlight: {{ lineHighlight }}
+{%- endif %}
+</pre>
+</div>
+<div data-tab="turtle" data-tab-label="Turtle">
+{%- if turtle %}
+<pre class=include-code>
+path: {{ turtle }}
+highlight: turtle
+line-numbers: true
+</pre>
+{%- else %}
+<pre highlight=turtle line-numbers>
+{{ path | jsonLdToTurtle | escape }}</pre>
+{%- endif %}
+</div>
+</div>
