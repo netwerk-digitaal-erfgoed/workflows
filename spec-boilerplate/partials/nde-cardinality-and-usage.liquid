@@ -122,6 +122,9 @@
             {% assign future_text = iri | prepend: "must be " -%}
         {% elsif change.severity == "Violation" and property.datatype -%}
             {% assign future_text = property.datatype | replace: 'http://www.w3.org/2001/XMLSchema#', 'xsd:' | replace: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'rdf:' | prepend: 'must be ' -%}
+        {%- comment -%} A node shape with an rdfs:label, such as “web URI”, is named by it rather than by its pattern. {%- endcomment %}
+        {% elsif change.severity == "Violation" and property.node['rdfs:label'] -%}
+            {% assign future_text = property.node['rdfs:label'] | prepend: "must be " -%}
         {% elsif change.severity == "Violation" and property.node.pattern -%}
             {% capture future_text %}must match <code>{{ property.node.pattern }}</code>{% endcapture -%}
         {% elsif change.severity == "Violation" and is_date_shape -%}
