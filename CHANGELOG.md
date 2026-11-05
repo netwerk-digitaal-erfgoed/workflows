@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.6.0...v1.6.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **spec-boilerplate:** align advisements with the text around them ([#79](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/79)) ([b1f36e5](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/b1f36e549d16af67a80a4262773540e58c72e25b))
+
 ## [1.6.0](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.5.2...v1.6.0) (2026-11-05)
 
 
