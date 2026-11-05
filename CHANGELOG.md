@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.5.1...v1.5.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **spec-boilerplate:** name a labelled node shape in a future change ([#75](https://github.com/netwerk-digitaal-erfgoed/workflows/issues/75)) ([f6750fa](https://github.com/netwerk-digitaal-erfgoed/workflows/commit/f6750fa25ac7adb24e9fbb253b9033b305dd4bb9))
+
 ## [1.5.1](https://github.com/netwerk-digitaal-erfgoed/workflows/compare/v1.5.0...v1.5.1) (2026-11-05)
 
 
