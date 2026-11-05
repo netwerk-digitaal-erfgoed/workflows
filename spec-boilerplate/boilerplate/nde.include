@@ -44,6 +44,13 @@
 :where(main table code) {
     overflow-wrap: anywhere;
 }
+
+/* Advisements aligned like the text around them rather than centred, which reads
+   badly once one runs over several lines. Not inside :where(), to beat Bikeshed’s
+   own strong.advisement rule. */
+strong.advisement {
+    text-align: start;
+}
 </style>
 
 <style>
