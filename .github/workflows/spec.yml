@@ -74,7 +74,7 @@ jobs:
           done
 
       - name: Build and validate
-        uses: w3c/spec-prod@v2.14.1
+        uses: w3c/spec-prod@v2.14.3
         with:
           VALIDATE_MARKUP: false
           SOURCE: ${{ inputs.working-directory != '.' && format('{0}/index.bs', inputs.working-directory) || '' }}
